@@ -1,7 +1,8 @@
 import { createRouter, createWebHashHistory } from 'vue-router'
 import PasajeroView from '@/views/PasajeroView.vue';
 import LoginView from '@/views/LoginView.vue';
-
+import AvionView from '@/views/AvionView.vue'
+import ReservaView from '@/views/ReservaView.vue'
 const routes = [
   {
     path: '/about',
@@ -23,6 +24,22 @@ const routes = [
     path: '/',
     name: 'login',
     component: LoginView
+  },
+  {
+    path: "/avion",
+    name: "avion",
+    component: AvionView,
+    meta: {
+      requiereAutorizacion: false
+    }
+  },
+  {
+    path: "/reserva",
+    name: "reserva",
+    component: ReservaView,
+    meta: {
+      requiereAutorizacion: false
+    }
   },
 ]
 

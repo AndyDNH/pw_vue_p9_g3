@@ -2,6 +2,10 @@
   <nav>
     <router-link to="/"></router-link>
     <router-link to="/pasajero">Pasajero</router-link> |
+    <router-link to="/pasajero">Pasajero</router-link> |
+    <router-link to="/avion">Avion</router-link> |
+    <router-link to="/reserva">Reserva</router-link>
+
   </nav>
   <router-view/>
 </template>
