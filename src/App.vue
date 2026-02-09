@@ -1,14 +1,18 @@
 <template>
   <nav>
-    <router-link to="/">Home</router-link> |
-    <router-link to="/about">About</router-link>| 
-    <!-- <router-link to="/reporte-vuelos">Reporte de Vuelos</router-link> -->
+    <router-link to="/">Login</router-link>   |
+    <router-link to="/pasajero">Pasajero</router-link> |
+    <router-link to="/formulario">Formulario</router-link> |
+    <router-link to="/avion">Avion</router-link> |
+    <router-link to="/reserva">Reserva</router-link> |
+    <router-link to="/reporteV">Reporte Vuelos</router-link> |
+    <router-link to="/reporteR">Reporte Reservas</router-link> |
   </nav>
   <router-view />
 </template>
 
 <style>
-#app {
+nav {
   font-family: Avenir, Helvetica, Arial, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
