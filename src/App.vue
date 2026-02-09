@@ -1,7 +1,10 @@
 <template>
   <nav>
-    <router-link to="/"></router-link>
+    <router-link to="/">Login</router-link>   |
     <router-link to="/pasajero">Pasajero</router-link> |
+    <router-link to="/Formulario">Formulario</router-link> |
+    <router-link to="/Avion">Avion</router-link> |
+    <router-link to="/Reserva">Reserva</router-link> |
   </nav>
   <router-view/>
 </template>

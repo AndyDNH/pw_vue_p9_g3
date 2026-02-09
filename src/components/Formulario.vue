@@ -1,3 +1,14 @@
+<script setup>
+import { ref } from 'vue'
+
+const email = ref('')
+const password = ref('')
+
+const handleLogin = () => {
+  console.log('Ingresando con:', email.value, password.value)
+}
+</script>
+
 <template>
   <div class="login-wrapper">
     <div class="card">
@@ -5,8 +16,8 @@
       <div class="left-panel">
         <div class="logo-white">*</div>
         <div class="left-content">
-          <p class="subtitle-small">Viaja Seguro</p>
-          <h2>Agenda tu cita hoy mismo</h2>
+          <p class="subtitle-small">You can easily</p>
+          <h2>Haz silencio lucho</h2>
         </div>
       </div>
 
@@ -14,22 +25,22 @@
         <div class="logo-color">*</div>
         <h1>Ingresa a tu cuenta</h1>
         <p class="description">
-          Viajes en todo momento y el cualquier lugar.
+          Access your tasks, notes, and projects anytime, anywhere.
         </p>
 
         <form @submit.prevent="handleLogin">
           <div class="input-group">
-            <label for="usuario">Usuario</label>
+            <label for="email">Your email</label>
             <input 
-              id="usuario" 
-              type="text" 
-              v-model="usuario" 
-              placeholder="Andres"
+              id="email" 
+              type="email" 
+              v-model="email" 
+              placeholder="nombre@ejemplo.com"
             >
           </div>
 
           <div class="input-group">
-            <label for="password">Contraseña</label>
+            <label for="password">Password</label>
             <div class="password-wrapper">
               <input 
                 id="password" 
@@ -41,7 +52,7 @@
             </div>
           </div>
 
-          <button @click="login()" type="submit" class="btn-primary">
+          <button type="submit" class="btn-primary">
             Ingresar
           </button>
         </form>
@@ -51,32 +62,13 @@
   </div>
 </template>
 
-<script>
-import { obtenertokenFachada } from "../clients/AutorizationClient.js";
-export default {
-  data() {
-    return {
-      usuario: "",
-      password: "",
-    };
-  },
-  methods: {
-    async login() {
-      await obtenertokenFachada(this.usuario, this.password);
-      localStorage.setItem("estaAutorizado", true);
-
-    },
-  },
-};
-</script>
-
 <style scoped>
 /* Contenedor General para centrar en pantalla */
 .login-wrapper {
   display: flex;
   justify-content: center;
   align-items: center;
-  min-height: 100vh;
+  min-height: 100vh;    
   background-color: #f3f4f6;
   font-family: 'Inter', sans-serif;
 }

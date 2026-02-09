@@ -1,6 +1,10 @@
 import { createRouter, createWebHashHistory } from 'vue-router'
 import PasajeroView from '@/views/PasajeroView.vue';
 import LoginView from '@/views/LoginView.vue';
+import Formulario from '@/components/Formulario.vue';
+import ReservaView from '@/views/ReservaView.vue';
+import AvionView from  '@/views/AvionView.vue';
+
 
 const routes = [
   {
@@ -23,6 +27,26 @@ const routes = [
     path: '/',
     name: 'login',
     component: LoginView
+  }, {
+    path: '/formulario',
+    name: 'formulario',
+    component: Formulario
+  },
+  {
+    path: "/avion",
+    name: "avion",
+    component: AvionView,
+    meta: {
+      requiereAutorizacion: false
+    }
+  },
+  {
+    path: "/reserva",
+    name: "reserva",
+    component: ReservaView,
+    meta: {
+      requiereAutorizacion: false
+    }
   },
 ]
 
@@ -31,20 +55,25 @@ const router = createRouter({
   routes
 })
 
+
 router.beforeEach((to, from, next) => {
-  const estaAutenticado = localStorage.getItem('estaAutorizado');
-  if (to.name === 'login' && estaAutenticado) {
-    next({ name: 'pasajero' });
-    return;
+  if (to.meta.requiereAuth) {
+    if (!estaAutenticado) {
+      console.log("Ingresa el usuario y contraseña antes de seguir");
+      next({
+        name: 'login',
+        query: { redirect: to.fullPath }
+      })
+    }
+    else {
+      next();
+    }
   }
-
-  if (to.meta.requiereAutorizacion && !estaAutenticado) {
-    next({ name: 'login' });
-    return;
+  else {
+    console.log("Acceso Libre");
+    next();
   }
-
-  next();
-
-})
+}
+)
 
 export default router
