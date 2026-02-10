@@ -63,7 +63,7 @@ export default {
   methods: {
     async login() {
       await obtenertokenFachada(this.usuario, this.password);
-      localStorage.setItem("estaAutorizado", true);
+      localStorage.setItem("estaAutenticado", true);
 
     },
   },

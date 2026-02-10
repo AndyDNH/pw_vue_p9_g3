@@ -10,7 +10,8 @@ const listarTodos = async () => {
 }
 
 const consultarPorId = async (id) => {
-    const res = await axios.get(`${URL}/${id}`);
+    const Token = getToken();
+    const res = await axios.get(`${URL}/${id}`, { headers: { Authorization: `Bearer ${Token}` } });
     return res.data;
 }
 

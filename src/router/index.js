@@ -6,16 +6,13 @@ import AvionView from  '@/views/AvionView.vue';
 import ReporteVuelosView from '@/views/ReporteVuelosView.vue';
 import ReporteReservasView from '@/views/ReporteReservasView.vue';
 
-
-
-
 const routes = [
   {
     path: '/pasajero',
     name: 'pasajero',
     component: PasajeroView,
     meta: {
-      requiereAutorizacion: false
+      requiereAutorizacion: true
     }
   },
   {
@@ -28,7 +25,7 @@ const routes = [
     name: "avion",
     component: AvionView,
     meta: {
-      requiereAutorizacion: false
+      requiereAutorizacion: true
     }
   },
   {
@@ -65,14 +62,14 @@ const router = createRouter({
 
 router.beforeEach((to, from, next) => {
   if (to.meta.requiereAutorizacion) {
+    const estaAutenticado = localStorage.getItem("estaAutenticado");
     if (!estaAutenticado) {
       console.log("Ingresa el usuario y contraseña antes de seguir");
       next({
         name: 'login',
         query: { redirect: to.fullPath }
       })
-    }
-    else {
+    } else {
       next();
     }
   }
