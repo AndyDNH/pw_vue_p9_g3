@@ -1,12 +1,19 @@
 <template>
   <div class="container">
     <div class="formulario">
-      <h2 class="titulo">Reporte de Vuelos</h2>
+      <h2 class="titulo">Reporte de Reservas</h2>
 
-      <!-- <button @click="consultarTodos">Consultar todos</button> -->
+      <div class="consultar">
+        <button @click="consultarReservas">
+          🔄 Recargar
+        </button>
+      </div>
 
-      <table  class="tabla">
-        <!-- v-if="vuelos.length" -->
+      <!-- LOADING -->
+      <p v-if="loading">Cargando reservas...</p>
+
+      <!-- TABLA -->
+      <table v-if="reservas.length" class="tabla">
         <thead>
           <tr>
             <th>ID</th>
@@ -20,78 +27,221 @@
             <th>Acciones</th>
           </tr>
         </thead>
-    
+
         <tbody>
-          <!-- <tr v-for="v in vuelos" :key="v.id"> -->
-            <!-- <td>{{ v.id }}</td>
-            <td>{{ v.fecha }}</td>
-            <td>{{ v.hora }}</td>
-            <td>{{ v.origen }}</td>
-            <td>{{ v.destino }}</td>
-            <td>{{ v.precio }}</td>
-            <td>{{ v.estado }}</td>
-            <td>{{ v.asiento }}</td> -->
-            <td>test</td>
-            <td>test</td>
-            <td>test</td>
-            <td>test</td>
-            <td>test</td>
-            <td>test</td>
-            <td>test</td>
-            <td>test</td>
-            <td>
-            <button @click="editar(v.id)">Editar</button>
-            <button @click="eliminar(v.id)">Eliminar</button>
+          <tr v-for="r in reservas" :key="r.id">
+
+            <td>{{ r.id }}</td>
+
+            <!-- FECHA -->
+            <td v-if="editandoId !== r.id">{{ r.fecha }}</td>
+            <td v-else>
+              <input type="date" v-model="reservaEditada.fecha">
             </td>
-          </tbody>
+
+            <!-- HORA -->
+            <td v-if="editandoId !== r.id">{{ r.hora }}</td>
+            <td v-else>
+              <input type="time" v-model="reservaEditada.hora">
+            </td>
+
+            <!-- ORIGEN -->
+            <td v-if="editandoId !== r.id">{{ r.origen }}</td>
+            <td v-else>
+              <input type="text" v-model="reservaEditada.origen">
+            </td>
+
+            <!-- DESTINO -->
+            <td v-if="editandoId !== r.id">{{ r.destino }}</td>
+            <td v-else>
+              <input type="text" v-model="reservaEditada.destino">
+            </td>
+
+            <!-- PRECIO -->
+            <td v-if="editandoId !== r.id">{{ r.precio }}</td>
+            <td v-else>
+              <input type="number" v-model="reservaEditada.precio">
+            </td>
+
+            <!-- ESTADO -->
+            <td v-if="editandoId !== r.id">{{ r.estado }}</td>
+            <td v-else>
+              <input type="text" v-model="reservaEditada.estado">
+            </td>
+
+            <!-- ASIENTO -->
+            <td v-if="editandoId !== r.id">{{ r.asiento }}</td>
+            <td v-else>
+              <input type="text" v-model="reservaEditada.asiento">
+            </td>
+
+            <td>
+
+              <!-- MODO NORMAL -->
+              <template v-if="editandoId !== r.id">
+                <button @click="activarEdicion(r)">✏️ Editar</button>
+                <button @click="eliminarReserva(r.id)">🗑️ Eliminar</button>
+              </template>
+
+              <!-- MODO EDICIÓN -->
+              <template v-else>
+                <button @click="guardarEdicion">💾 Guardar</button>
+                <button @click="cancelarEdicion">❌ Cancelar</button>
+              </template>
+
+            </td>
+          </tr>
+        </tbody>
+
       </table>
 
-      <!-- <p v-if="!reservas.length && cargado" class="mensaje">
+      <!-- MENSAJE VACÍO -->
+      <p v-if="!reservas.length && !loading">
         No existen reservas registradas
-      </p> -->
+      </p>
+
+      <!-- ERROR -->
+      <p v-if="error" style="color:red;">
+        {{ error }}
+      </p>
+
     </div>
   </div>
 </template>
 <script>
- import { consultarReservas } from "@/clients/ReservasClient";
-//import { obtenerTokenFachada } from "@/clients/AuthClient";
+import {
+  consultarTodosFachada,
+  borrarFachada,
+  actualizarFachada
+} from "@/clients/ReservasClient";
+
 export default {
   data() {
     return {
       reservas: [],
-      cargado: false,
-      token: null,
+      loading: false,
+      error: null,
+
+      editandoId: null,
+      reservaEditada: {
+        fecha: "",
+        hora: "",
+        origen: "",
+        destino: "",
+        precio: "",
+        estado: "",
+        asiento: ""
+      }
     };
   },
+
   async mounted() {
-    //this.token = await obtenerTokenFachada();
+    this.consultarReservas();
   },
+
   methods: {
-    async consultarTodos() {
-      //this.reservas = await consultarReservas(this.token);
-      this.cargado = true;
+
+    async consultarReservas() {
+      try {
+        this.loading = true;
+        this.error = null;
+
+        this.reservas = await consultarTodosFachada();
+
+      } catch (err) {
+        this.error = "Error al obtener las reservas";
+        console.error(err);
+      } finally {
+        this.loading = false;
+      }
     },
+
+    activarEdicion(reserva) {
+      this.editandoId = reserva.id;
+      this.reservaEditada = { ...reserva };
+    },
+
+    cancelarEdicion() {
+      this.editandoId = null;
+      this.reservaEditada = {
+        fecha: "",
+        hora: "",
+        origen: "",
+        destino: "",
+        precio: "",
+        estado: "",
+        asiento: ""
+      };
+    },
+
+    async guardarEdicion() {
+      try {
+
+        await actualizarFachada(
+          this.editandoId,
+          this.reservaEditada
+        );
+
+        const index = this.reservas.findIndex(
+          r => r.id === this.editandoId
+        );
+
+        this.reservas[index] = { ...this.reservaEditada };
+
+        this.cancelarEdicion();
+
+      } catch (err) {
+        this.error = "No se pudo actualizar";
+        console.error(err);
+      }
+    },
+    async eliminarReserva(id) {
+
+      const confirmado = confirm(
+        "¿Seguro que deseas eliminar esta reserva?"
+      );
+
+      if (!confirmado) return;
+
+      try {
+
+        await borrarFachada(id);
+
+        // Recargar tabla automáticamente
+        this.consultarReservas();
+
+      } catch (err) {
+        this.error = "No se pudo eliminar la reserva";
+        console.error(err);
+      }
+    },
+
   },
 };
 </script>
+
 <style scoped>
-/* Fondo general */
 .container {
-  min-height: 100vh;
   display: flex;
+  flex-direction: column;
   justify-content: center;
   align-items: center;
+  min-height: 100vh;
   background-color: #f3f4f6;
   font-family: 'Inter', sans-serif;
 }
 
 /* Card principal */
 .formulario {
-  width: 1000px;
+  display: flex;
+  flex-direction: column;
+  width: 900px;
+  height: 550px;
   background: white;
-  padding: 40px;
   border-radius: 24px;
   box-shadow: 0 20px 60px rgba(0, 0, 0, 0.08);
+  overflow: hidden;
+  padding: 10px;
 }
 
 /* Título */
@@ -100,6 +250,22 @@ export default {
   font-weight: 700;
   color: #111827;
   margin-bottom: 30px;
+}
+
+/* Consultar button container */
+.consultar {
+  margin-bottom: 20px;
+
+}
+
+input {
+  width: 100%;
+  border-collapse: collapse;
+  overflow: hidden;
+  border-radius: 12px;
+  padding: 6px 10px;
+  font-size: 0.9rem;
+  border: 1px solid #d1d5db;
 }
 
 /* Tabla moderna */

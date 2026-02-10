@@ -30,3 +30,4 @@ export const consultarPorIdFachada = async (id) => await consultarPorId(id);
 export const guardarFachada = async (body) => await guardar(body);
 export const actualizarFachada = async (id, body) => await actualizar(id, body);
 export const borrarFachada = async (id) => await borrar(id);
+
