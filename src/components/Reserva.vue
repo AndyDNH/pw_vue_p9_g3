@@ -1,18 +1,17 @@
 <template>
   <div>
     <h2>RESERVAS</h2>
-    <!-- CONSULTAS -->
-    <div style="margin-bottom: 20px;">
-      <button @click="consumirTodos">Consultar Todos</button>
 
-      <button @click="consumirPorId">Consultar por ID</button>
-      <input v-model.number="idConsulta" type="number" min="1" placeholder="ID" />
-    </div>
+    <button @click="consumirTodos">Consultar Todos</button>
 
-    <!-- FORMULARIO -->
+    <button @click="consumirPorId">Consultar por ID</button>
+    <input v-model.number="idConsulta" type="number" min="1" placeholder="ID" />
+
+    <hr />
+
     <h3>{{ modoEdicion ? "Actualizar Reserva" : "Registrar Reserva" }}</h3>
 
-    <input v-if="modoEdicion" v-model.number="idEdicion" type="number" placeholder="ID (edición)" disabled />
+    <input v-if="modoEdicion" v-model.number="idEdicion" type="number" disabled />
 
     <input v-model="reserva.fecha" type="date" />
     <input v-model="reserva.hora" type="time" />
@@ -29,13 +28,14 @@
     <button v-else @click="actualizar">Actualizar</button>
     <button @click="limpiar">Limpiar</button>
 
-    <h3 style="margin-top: 25px;">Borrar Reserva</h3>
+    <hr />
+
+    <h3>Borrar Reserva</h3>
     <input v-model.number="idBorrar" type="number" min="1" placeholder="ID a borrar" />
     <br /><br />
     <button @click="borrar">Borrar</button>
 
-    <!-- TABLA -->
-    <h3 style="margin-top: 25px;">Resultados</h3>
+    <hr />
 
     <table v-if="reservas && reservas.length" border="1" style="margin:auto">
       <tr>
@@ -83,13 +83,14 @@ import {
   guardarFachada,
   actualizarFachada,
   borrarFachada,
-} from "../clients/ReservasClient.js";
+} from "../clients/ReservaClient.js";
 
 export default {
   data() {
     return {
       reservas: null,
       reservaUnica: null,
+
       idConsulta: null,
 
       modoEdicion: false,
@@ -110,7 +111,6 @@ export default {
       idBorrar: null,
     };
   },
-
   methods: {
     async consumirTodos() {
       this.reservas = null;
@@ -140,6 +140,7 @@ export default {
     cargarEdicion(r) {
       this.modoEdicion = true;
       this.idEdicion = r.id;
+
       this.reserva = {
         fecha: r.fecha,
         hora: r.hora,
@@ -186,16 +187,14 @@ export default {
 };
 </script>
 
-<style scoped>
+<style>
 button {
   margin-right: 10px;
   padding: 6px 10px;
 }
 input {
-  display: block;
-  margin: 8px auto;
+  margin-right: 10px;
   padding: 6px 10px;
-  width: 260px;
 }
 th, td {
   padding: 8px 12px;

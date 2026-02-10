@@ -2,21 +2,19 @@
   <div>
     <h2>AVIONES</h2>
 
-    <!-- CONSULTAS -->
-    <div style="margin-bottom: 20px;">
-      <button @click="consumirTodos">Consultar Todos</button>
+    <button @click="consumirTodos">Consultar Todos</button>
 
-      <button @click="consumirPorId">Consultar por ID</button>
-      <input v-model.number="idConsulta" type="number" min="1" placeholder="ID" />
+    <button @click="consumirPorId">Consultar por ID</button>
+    <input v-model.number="idConsulta" type="number" min="1" placeholder="ID" />
 
-      <button @click="consumirPorAerolinea">Buscar por Aerolínea</button>
-      <input v-model="aerolineaConsulta" type="text" placeholder="Aerolínea" />
-    </div>
+    <button @click="consumirPorAerolinea">Buscar por Aerolínea</button>
+    <input v-model="aerolineaConsulta" type="text" placeholder="Aerolínea" />
 
-    <!-- FORMULARIO -->
+    <hr />
+
     <h3>{{ modoEdicion ? "Actualizar Avión" : "Registrar Avión" }}</h3>
 
-    <input v-if="modoEdicion" v-model.number="idEdicion" type="number" placeholder="ID (edición)" disabled />
+    <input v-if="modoEdicion" v-model.number="idEdicion" type="number" disabled />
 
     <input v-model="avion.modelo" placeholder="Modelo" type="text" />
     <input v-model.number="avion.capacidad" placeholder="Capacidad" type="number" min="1" />
@@ -24,19 +22,19 @@
     <input v-model="avion.clase" placeholder="Clase" type="text" />
     <input v-model="avion.espacioEquipaje" placeholder="Espacio Equipaje" type="text" />
 
-    <br/><br/>
-    
+    <br /><br />
     <button v-if="!modoEdicion" @click="guardar">Guardar</button>
     <button v-else @click="actualizar">Actualizar</button>
     <button @click="limpiar">Limpiar</button>
 
-    <h3 style="margin-top: 25px;">Borrar Avión</h3>
+    <hr />
+
+    <h3>Borrar Avión</h3>
     <input v-model.number="idBorrar" type="number" min="1" placeholder="ID a borrar" />
     <br /><br />
     <button @click="borrar">Borrar</button>
 
-    <!-- TABLA -->
-    <h3 style="margin-top: 25px;">Resultados</h3>
+    <hr />
 
     <table v-if="aviones && aviones.length" border="1" style="margin:auto">
       <tr>
@@ -86,15 +84,15 @@ import {
 export default {
   data() {
     return {
-      // consultas
       aviones: null,
       avionUnico: null,
+
       idConsulta: null,
       aerolineaConsulta: "",
 
-      // form
       modoEdicion: false,
       idEdicion: null,
+
       avion: {
         modelo: "",
         capacidad: null,
@@ -103,11 +101,9 @@ export default {
         espacioEquipaje: "",
       },
 
-      // borrar
       idBorrar: null,
     };
   },
-
   methods: {
     async consumirTodos() {
       this.aviones = null;
@@ -187,6 +183,7 @@ export default {
     limpiar() {
       this.modoEdicion = false;
       this.idEdicion = null;
+
       this.avion = {
         modelo: "",
         capacidad: null,
@@ -199,16 +196,14 @@ export default {
 };
 </script>
 
-<style scoped>
+<style>
 button {
   margin-right: 10px;
   padding: 6px 10px;
 }
 input {
-  display: block;
-  margin: 8px auto;
+  margin-right: 10px;
   padding: 6px 10px;
-  width: 260px;
 }
 th, td {
   padding: 8px 12px;

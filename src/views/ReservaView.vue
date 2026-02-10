@@ -1,17 +1,15 @@
 <template>
-  <Reserva/>
+  <div>
+    <Reserva />
+  </div>
 </template>
 
 <script>
-import Reserva from "@/components/Reserva.vue";
+import Reserva from "../components/Reserva.vue";
 
 export default {
-  name: "ReservaView",
   components: { 
     Reserva 
-},
+  },
 };
 </script>
-
-<style>
-</style>

@@ -1,32 +1,45 @@
 import axios from "axios";
 
-const URL = "http://localhost:8081/aviones";
+
+const URL = "http://localhost:8081/aerolinea/api/v1.0/aviones";
+const getToken = () => localStorage.getItem("token");
 
 const consultarTodos = async () => {
-  const res = await axios.get(URL);
+  const res = await axios.get(URL, {
+    headers: { Authorization: "Bearer " + getToken() },
+  });
   return res.data;
 };
 
 const consultarPorId = async (id) => {
-  const res = await axios.get(`${URL}/${id}`);
+  const res = await axios.get(URL + "/" + id, {
+    headers: { Authorization: "Bearer " + getToken() },
+  });
   return res.data;
 };
 
 const guardar = async (body) => {
-  await axios.post(URL, body);
+  await axios.post(URL, body, {
+    headers: { Authorization: "Bearer " + getToken() },
+  });
 };
 
 const actualizar = async (id, body) => {
-  await axios.put(`${URL}/${id}`, body);
+  await axios.put(URL + "/" + id, body, {
+    headers: { Authorization: "Bearer " + getToken() },
+  });
 };
 
 const borrar = async (id) => {
-  await axios.delete(`${URL}/${id}`);
+  await axios.delete(URL + "/" + id, {
+    headers: { Authorization: "Bearer " + getToken() },
+  });
 };
 
 const buscarPorAerolinea = async (aerolinea) => {
-  const res = await axios.get(`${URL}/aerolinea`, {
+  const res = await axios.get(URL + "/aerolinea", {
     params: { aerolinea },
+    headers: { Authorization: "Bearer " + getToken() },
   });
   return res.data;
 };
