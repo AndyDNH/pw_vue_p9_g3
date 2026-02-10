@@ -2,7 +2,6 @@
   <nav>
     <router-link to="/">Login</router-link>   |
     <router-link to="/pasajero">Pasajero</router-link> |
-    <router-link to="/formulario">Formulario</router-link> |
     <router-link to="/avion">Avion</router-link> |
     <router-link to="/reserva">Reserva</router-link> |
     <router-link to="/reporteV">Reporte Vuelos</router-link> |

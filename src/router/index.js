@@ -1,7 +1,6 @@
 import { createRouter, createWebHashHistory } from 'vue-router'
 import PasajeroView from '@/views/PasajeroView.vue';
 import LoginView from '@/views/LoginView.vue';
-import Formulario from '@/components/Formulario.vue';
 import ReservaView from '@/views/ReservaView.vue';
 import AvionView from  '@/views/AvionView.vue';
 import ReporteVuelosView from '@/views/ReporteVuelosView.vue';
@@ -12,27 +11,17 @@ import ReporteReservasView from '@/views/ReporteReservasView.vue';
 
 const routes = [
   {
-    path: '/about',
-    name: 'about',
-    
-    component: () => import(/* webpackChunkName: "about" */ '../views/AboutView.vue')
-  },
-  {
     path: '/pasajero',
     name: 'pasajero',
     component: PasajeroView,
     meta: {
-      requiereAutorizacion: true
+      requiereAutorizacion: false
     }
   },
   {
     path: '/',
     name: 'login',
     component: LoginView
-  }, {
-    path: '/formulario',
-    name: 'formulario',
-    component: Formulario
   },
   {
     path: "/avion",
