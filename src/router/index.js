@@ -1,14 +1,10 @@
 import { createRouter, createWebHashHistory } from 'vue-router'
 import PasajeroView from '@/views/PasajeroView.vue';
 import LoginView from '@/views/LoginView.vue';
-import Formulario from '@/components/Formulario.vue';
 import ReservaView from '@/views/ReservaView.vue';
 import AvionView from  '@/views/AvionView.vue';
 import ReporteVuelosView from '@/views/ReporteVuelosView.vue';
 import ReporteReservasView from '@/views/ReporteReservasView.vue';
-
-
-
 
 const routes = [
   {
@@ -22,24 +18,20 @@ const routes = [
     name: 'pasajero',
     component: PasajeroView,
     meta: {
-      requiereAutorizacion: true
+      requiereAutorizacion: true,
     }
   },
   {
     path: '/',
     name: 'login',
     component: LoginView
-  }, {
-    path: '/formulario',
-    name: 'formulario',
-    component: Formulario
   },
   {
     path: "/avion",
     name: "avion",
     component: AvionView,
     meta: {
-      requiereAutorizacion: false
+      requiereAutorizacion: true
     }
   },
   {
@@ -47,7 +39,7 @@ const routes = [
     name: "reserva",
     component: ReservaView,
     meta: {
-      requiereAutorizacion: false
+      requiereAutorizacion: true
     }
   },
   {
@@ -55,7 +47,7 @@ const routes = [
     name: "reporteV",
     component: ReporteVuelosView,
     meta: {
-      requiereAutorizacion: false
+      requiereAutorizacion: true
     }
   },
   {
@@ -63,7 +55,7 @@ const routes = [
     name: "reporteR",
     component: ReporteReservasView,
     meta: {
-      requiereAutorizacion: false
+      requiereAutorizacion: true
     }
   },
 ]
@@ -76,6 +68,7 @@ const router = createRouter({
 
 router.beforeEach((to, from, next) => {
   if (to.meta.requiereAutorizacion) {
+    const estaAutenticado = localStorage.getItem("estaAutenticado");
     if (!estaAutenticado) {
       console.log("Ingresa el usuario y contraseña antes de seguir");
       next({

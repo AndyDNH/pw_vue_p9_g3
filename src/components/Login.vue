@@ -1,7 +1,7 @@
 <template>
   <div class="login-wrapper">
     <div class="card">
-      
+
       <div class="left-panel">
         <div class="logo-white">*</div>
         <div class="left-content">
@@ -20,23 +20,13 @@
         <form @submit.prevent="handleLogin">
           <div class="input-group">
             <label for="usuario">Usuario</label>
-            <input 
-              id="usuario" 
-              type="text" 
-              v-model="usuario" 
-              placeholder="Andres"
-            >
+            <input id="usuario" type="text" v-model="usuario" placeholder="Andres">
           </div>
 
           <div class="input-group">
             <label for="password">Contraseña</label>
             <div class="password-wrapper">
-              <input 
-                id="password" 
-                type="password" 
-                v-model="password" 
-                placeholder="••••••••••••"
-              >
+              <input id="password" type="password" v-model="password" placeholder="••••••••••••">
               <span class="eye-icon">👁️</span>
             </div>
           </div>
@@ -46,7 +36,7 @@
           </button>
         </form>
       </div>
-      
+
     </div>
   </div>
 </template>
@@ -63,7 +53,15 @@ export default {
   methods: {
     async login() {
       await obtenertokenFachada(this.usuario, this.password);
-      localStorage.setItem("estaAutorizado", true);
+      const token = localStorage.getItem("token");
+      console.log('Token: ', token);
+      if (token) {
+        localStorage.setItem("estaAutenticado", true);
+        const redirectPath = this.$route.query.redirect || { name: 'pasajero' };
+        this.$router.push(redirectPath);
+      } else {
+        console.log('Credenciales incorrectas, vuelva a ingresar sus credenciales');
+      }
 
     },
   },
@@ -90,7 +88,8 @@ export default {
   border-radius: 24px;
   box-shadow: 0 20px 60px rgba(0, 0, 0, 0.08);
   overflow: hidden;
-  padding: 10px; /* Pequeño padding interno como en el diseño */
+  padding: 10px;
+  /* Pequeño padding interno como en el diseño */
 }
 
 /* --- Panel Izquierdo (Gradiente) --- */
@@ -98,7 +97,7 @@ export default {
   flex: 1;
   border-radius: 20px;
   /* El truco del degradado estilo "blur" */
-  background: 
+  background:
     radial-gradient(circle at top left, #a5f3fc, transparent 50%),
     radial-gradient(circle at bottom right, #7e22ce, transparent 50%),
     linear-gradient(135deg, #3b82f6, #60a5fa);
@@ -182,7 +181,8 @@ input {
   color: #1f2937;
   outline: none;
   transition: border-color 0.2s, box-shadow 0.2s;
-  box-sizing: border-box; /* Importante para que el padding no rompa el width */
+  box-sizing: border-box;
+  /* Importante para que el padding no rompa el width */
 }
 
 input:focus {
@@ -208,7 +208,8 @@ input:focus {
 /* Botón Principal */
 .btn-primary {
   width: 100%;
-  background-color: #4f46e5; /* Color índigo similar a la imagen */
+  background-color: #4f46e5;
+  /* Color índigo similar a la imagen */
   color: white;
   padding: 14px;
   border: none;
@@ -217,7 +218,8 @@ input:focus {
   font-weight: 600;
   cursor: pointer;
   margin-top: 10px;
-  box-shadow: 0 4px 14px rgba(79, 70, 229, 0.4); /* Sombra suave de color */
+  box-shadow: 0 4px 14px rgba(79, 70, 229, 0.4);
+  /* Sombra suave de color */
   transition: transform 0.1s, box-shadow 0.2s;
 }
 

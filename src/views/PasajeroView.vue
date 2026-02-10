@@ -14,10 +14,5 @@ export default {
 </script>
 
 <style scoped>
-.container-pasajero{
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-}
+
 </style>
