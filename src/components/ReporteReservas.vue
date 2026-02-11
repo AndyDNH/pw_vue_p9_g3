@@ -113,7 +113,7 @@ import {
   consultarTodosFachada,
   borrarFachada,
   actualizarFachada
-} from "@/clients/ReservasClient";
+} from "@/clients/ReservaClient";
 
 export default {
   data() {
