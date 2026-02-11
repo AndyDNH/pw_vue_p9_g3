@@ -3,8 +3,6 @@ import PasajeroView from '@/views/PasajeroView.vue';
 import LoginView from '@/views/LoginView.vue';
 import ReservaView from '@/views/ReservaView.vue';
 import AvionView from  '@/views/AvionView.vue';
-import ReporteVuelosView from '@/views/ReporteVuelosView.vue';
-import ReporteReservasView from '@/views/ReporteReservasView.vue';
 
 const routes = [
   {
@@ -42,22 +40,7 @@ const routes = [
       requiereAutorizacion: true
     }
   },
-  {
-    path: "/reporteV",
-    name: "reporteV",
-    component: ReporteVuelosView,
-    meta: {
-      requiereAutorizacion: true
-    }
-  },
-  {
-    path: "/reporteR",
-    name: "reporteR",
-    component: ReporteReservasView,
-    meta: {
-      requiereAutorizacion: true
-    }
-  },
+  
 ]
 
 const router = createRouter({

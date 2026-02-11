@@ -17,7 +17,7 @@
           Crear Pasajero
         </button>
         <button :class="['tab', { active: activeTab === 'lista' }]" @click="activeTab = 'lista'">
-          Lista de Pasajeros
+          Reporte de Pasajeros
         </button>
         <button :class="['tab', { active: activeTab === 'editar' }]" @click="activeTab = 'editar'">
           Editar Pasajero
