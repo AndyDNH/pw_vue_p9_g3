@@ -1,6 +1,6 @@
 import axios from "axios";
 
-const URL = "http://localhost:8081/aerolinea/api/v1.0/aviones";
+const URL = "http://localhost:8081/aerolinea/api/v1.0/reservas";
 
 const consultarTodos = async () => {
   const TOKEN = localStorage.getItem("token");
@@ -46,17 +46,6 @@ const borrar = async (id) => {
   });
 };
 
-const buscarPorAerolinea = async (aerolinea) => {
-  const TOKEN = localStorage.getItem("token");
-
-  const res = await axios.get(URL + "/aerolinea", {
-    params: { aerolinea: aerolinea },
-    headers: { Authorization: "Bearer " + TOKEN },
-  });
-
-  return res.data;
-};
-
 // FACHADAS
 export const consultarTodosFachada = async () => {
   return await consultarTodos();
@@ -76,8 +65,4 @@ export const actualizarFachada = async (id, body) => {
 
 export const borrarFachada = async (id) => {
   await borrar(id);
-};
-
-export const buscarPorAerolineaFachada = async (aerolinea) => {
-  return await buscarPorAerolinea(aerolinea);
 };

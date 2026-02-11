@@ -12,7 +12,7 @@ const routes = [
     name: 'pasajero',
     component: PasajeroView,
     meta: {
-      requiereAutorizacion: true
+      requiereAutorizacion: true,
     }
   },
   {
@@ -33,7 +33,7 @@ const routes = [
     name: "reserva",
     component: ReservaView,
     meta: {
-      requiereAutorizacion: false
+      requiereAutorizacion: true
     }
   },
   {
@@ -41,7 +41,7 @@ const routes = [
     name: "reporteV",
     component: ReporteVuelosView,
     meta: {
-      requiereAutorizacion: false
+      requiereAutorizacion: true
     }
   },
   {
@@ -49,7 +49,7 @@ const routes = [
     name: "reporteR",
     component: ReporteReservasView,
     meta: {
-      requiereAutorizacion: false
+      requiereAutorizacion: true
     }
   },
 ]
