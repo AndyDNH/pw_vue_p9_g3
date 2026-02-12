@@ -11,72 +11,51 @@
         </div>
       </div>
 
-      <!-- Tabs -->
       <div class="tabs">
-        <button :class="['tab', { active: activeTab === 'crear' }]" @click="activeTab = 'crear'">
+        <button
+          :class="['tab', { active: activeTab === 'lista' }]"
+          @click="activeTab = 'lista'"
+        >
+          Reporte de Pasajeros
+        </button>
+        <button
+          :class="['tab', { active: activeTab === 'crear' }]"
+          @click="activeTab = 'crear'"
+        >
           Crear Pasajero
         </button>
-        <button :class="['tab', { active: activeTab === 'lista' }]" @click="activeTab = 'lista'">
-          Lista de Pasajeros
-        </button>
-        <button :class="['tab', { active: activeTab === 'editar' }]" @click="activeTab = 'editar'">
+        <button
+          :class="['tab', { active: activeTab === 'editar' }]"
+          @click="activeTab = 'editar'"
+        >
           Editar Pasajero
         </button>
-        <button :class="['tab', { active: activeTab === 'eliminar' }]" @click="activeTab = 'eliminar'">
+        <button
+          :class="['tab', { active: activeTab === 'eliminar' }]"
+          @click="activeTab = 'eliminar'"
+        >
           Eliminar Pasajero
         </button>
       </div>
-      <!-- TAB 1: CREAR -->
-      <div v-if="activeTab === 'crear'" class="tab-content">
-        <div class="form-card">
-          <h3 class="form-title">Crear Nuevo Pasajero</h3>
 
-          <div class="pasajero-form">
-            <div class="form-grid">
-              <div class="form-group">
-                <label>Nombre:</label>
-                <input v-model="nombre" type="text" placeholder="Juan" />
-              </div>
-
-              <div class="form-group">
-                <label>Apellido:</label>
-                <input v-model="apellido" type="text" placeholder="Pérez" />
-              </div>
-
-              <div class="form-group">
-                <label>Cédula:</label>
-                <input v-model="cedula" type="text" maxlength="10" placeholder="17345...." />
-              </div>
-
-              <div class="form-group">
-                <label>Correo:</label>
-                <input v-model="email" type="email" placeholder="ejemplo@correo.com" />
-              </div>
-
-              <div class="form-group">
-                <label>Teléfono:</label>
-                <input v-model="telefono" type="tel" maxlength="10" placeholder="0987654321" />
-              </div>
-
-              <div class="form-group">
-                <label>Fecha de Nacimiento:</label>
-                <input v-model="fechaNacimiento" type="date" />
-              </div>
-            </div>
-
-            <div class="form-actions">
-              <button @click="limpiarFormulario" class="btn-limpiar">
-                Limpiar
-              </button>
-              <button @click="crear" class="btn-general">Guardar</button>
-            </div>
-          </div>
-        </div>
+      <div
+        v-if="mostrarMensaje"
+        class="mensaje-container"
+        style="margin-bottom: 20px; display: flex; justify-content: center"
+      >
+        <span class="mensaje">{{ mensaje }}</span>
       </div>
-      <!-- TAB 2: BUSCARTODOS -->
+
       <div v-if="activeTab === 'lista'" class="tab-content">
         <div class="seccion-buscar">
           <button @click="listar" class="btn-general">Ver Todos</button>
+          <input
+            v-model="idCedula"
+            type="text"
+            placeholder="Buscar por cédula"
+            class="input-buscar"
+          />
+          <button @click="buscarPorCedula" class="btn-buscar">Buscar</button>
         </div>
 
         <div class="table-todos">
@@ -99,7 +78,7 @@
                 <td>{{ pasajero.apellido }}</td>
                 <td>{{ formatDate(pasajero.fechaNacimiento) }}</td>
                 <td>{{ pasajero.cedula }}</td>
-                <td>{{ pasajero.email }}</td>
+                <td>{{ pasajero.correo }}</td>
                 <td>{{ pasajero.telefono }}</td>
               </tr>
               <tr v-if="pasajeroArr.length === 0">
@@ -111,14 +90,71 @@
           </table>
         </div>
       </div>
-      <!-- TAB 3: EDITAR -->
+
+      <div v-if="activeTab === 'crear'" class="tab-content">
+        <div class="form-card">
+          <h3 class="form-title">Crear Nuevo Pasajero</h3>
+          <div class="pasajero-form">
+            <div class="form-grid">
+              <div class="form-group">
+                <label>Nombre:</label>
+                <input v-model="nombre" type="text" placeholder="Juan" />
+              </div>
+              <div class="form-group">
+                <label>Apellido:</label>
+                <input v-model="apellido" type="text" placeholder="Pérez" />
+              </div>
+              <div class="form-group">
+                <label>Cédula:</label>
+                <input
+                  v-model="cedula"
+                  type="text"
+                  maxlength="10"
+                  placeholder="17345...."
+                />
+              </div>
+              <div class="form-group">
+                <label>Correo:</label>
+                <input
+                  v-model="correo"
+                  type="email"
+                  placeholder="ejemplo@correo.com"
+                />
+              </div>
+              <div class="form-group">
+                <label>Teléfono:</label>
+                <input
+                  v-model="telefono"
+                  type="tel"
+                  maxlength="10"
+                  placeholder="0987654321"
+                />
+              </div>
+              <div class="form-group">
+                <label>Fecha de Nacimiento:</label>
+                <input v-model="fechaNacimiento" type="date" />
+              </div>
+            </div>
+            <div class="form-actions">
+              <button @click="limpiarFormulario" class="btn-limpiar">
+                Limpiar
+              </button>
+              <button @click="crear" class="btn-general">Guardar</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
       <div v-if="activeTab === 'editar'" class="tab-content">
         <div class="form-card">
           <h3 class="form-title">Editar Pasajero</h3>
-
           <div class="seccion-buscar">
-            <input v-model.number="idBuscar" type="number" placeholder="ID del pasajero a editar"
-              class="input-buscar" />
+            <input
+              v-model.number="idBuscar"
+              type="number"
+              placeholder="ID del pasajero a editar"
+              class="input-buscar"
+            />
             <button @click="buscarParaEditar" class="btn-buscar">Buscar</button>
           </div>
 
@@ -128,61 +164,59 @@
                 <label>ID</label>
                 <input v-model="idEditar" type="text" disabled />
               </div>
-
               <div class="form-group">
                 <label>Nombre:</label>
                 <input v-model="nombreEditar" type="text" />
               </div>
-
               <div class="form-group">
                 <label>Apellido:</label>
                 <input v-model="apellidoEditar" type="text" />
               </div>
-
               <div class="form-group">
                 <label>Cédula:</label>
                 <input v-model="cedulaEditar" type="text" maxlength="10" />
               </div>
-
               <div class="form-group">
                 <label>Correo:</label>
-                <input v-model="emailEditar" type="email" />
+                <input v-model="correoEditar" type="email" />
               </div>
-
               <div class="form-group">
                 <label>Teléfono:</label>
                 <input v-model="telefonoEditar" type="tel" maxlength="10" />
               </div>
-
               <div class="form-group">
                 <label>Fecha Nacimiento:</label>
                 <input v-model="fechaNacimientoEditar" type="date" />
               </div>
             </div>
-
             <div class="form-actions">
               <button @click="cancelarEdicion" class="btn-limpiar">
                 Cancelar
               </button>
-              <button @click="actualizar" class="btn-general">Actualizar</button>
+              <button @click="actualizar" class="btn-general">
+                Actualizar
+              </button>
             </div>
           </div>
-
           <div v-else class="estado-vacio" style="padding: 40px">
             Ingresa un ID y haz clic en "Buscar" para editar un pasajero.
           </div>
         </div>
       </div>
 
-      <!-- TAB 4: ELIMINAR -->
       <div v-if="activeTab === 'eliminar'" class="tab-content">
         <div class="form-card">
           <h3 class="form-title">Eliminar Pasajero</h3>
-
           <div class="seccion-buscar">
-            <input v-model.number="idEliminar" type="number" placeholder="ID del pasajero a eliminar"
-              class="input-buscar" />
-            <button @click="buscarParaEliminar" class="btn-buscar">Buscar</button>
+            <input
+              v-model.number="idEliminar"
+              type="number"
+              placeholder="ID del pasajero a eliminar"
+              class="input-buscar"
+            />
+            <button @click="buscarParaEliminar" class="btn-buscar">
+              Buscar
+            </button>
           </div>
 
           <div v-if="nombreEliminar" class="delete-preview">
@@ -192,10 +226,9 @@
               <div><strong>Nombre:</strong> {{ nombreEliminar }}</div>
               <div><strong>Apellido:</strong> {{ apellidoEliminar }}</div>
               <div><strong>Cédula:</strong> {{ cedulaEliminar }}</div>
-              <div><strong>Email:</strong> {{ emailEliminar }}</div>
+              <div><strong>Correo:</strong> {{ correoEliminar }}</div>
               <div><strong>Teléfono:</strong> {{ telefonoEliminar }}</div>
             </div>
-
             <div class="form-actions">
               <button @click="cancelarEliminacion" class="btn-limpiar">
                 Cancelar
@@ -205,7 +238,6 @@
               </button>
             </div>
           </div>
-
           <div v-else class="estado-vacio" style="padding: 40px">
             Ingresa un ID y haz clic en "Buscar" para eliminar un pasajero.
           </div>
@@ -219,6 +251,7 @@
 import {
   listarTodosFachada,
   consultarPorIdFachada,
+  consultarPorCedulaFachada,
   guardarFachada,
   actualizarFachada,
   borrarFachada,
@@ -227,14 +260,17 @@ import {
 export default {
   data() {
     return {
-      activeTab: "crear",
+      activeTab: "lista",
       pasajeroArr: [],
+      mensaje: "",
+      mostrarMensaje: false,
+      idCedula: null,
 
       // CREAR
       nombre: "",
       apellido: "",
       cedula: "",
-      email: "",
+      correo: "",
       telefono: "",
       fechaNacimiento: "",
 
@@ -244,7 +280,7 @@ export default {
       nombreEditar: "",
       apellidoEditar: "",
       cedulaEditar: "",
-      emailEditar: "",
+      correoEditar: "",
       telefonoEditar: "",
       fechaNacimientoEditar: "",
 
@@ -253,15 +289,30 @@ export default {
       nombreEliminar: "",
       apellidoEliminar: "",
       cedulaEliminar: "",
-      emailEliminar: "",
+      correoEliminar: "",
       telefonoEliminar: "",
     };
   },
 
   methods: {
+    mostrarAlerta(texto) {
+      this.mensaje = texto;
+      this.mostrarMensaje = true;
+      setTimeout(() => {
+        this.mostrarMensaje = false;
+      }, 3000);
+    },
+
     async crear() {
-      if (!this.nombre || !this.apellido || !this.cedula || !this.email || !this.telefono) {
-      // if (!this.nombre || !this.apellido || !this.cedula || !this.email || !this.telefono || !this.fechaNacimiento) {
+      if (
+        !this.nombre ||
+        !this.apellido ||
+        !this.cedula ||
+        !this.correo ||
+        !this.telefono ||
+        !this.fechaNacimiento
+      ) {
+        this.mostrarAlerta("Por favor completa todos los campos");
         return;
       }
 
@@ -270,15 +321,15 @@ export default {
           nombre: this.nombre,
           apellido: this.apellido,
           cedula: this.cedula,
-          email: this.email,
+          correo: this.correo,
           telefono: this.telefono,
-          // fechaNacimiento: this.fechaNacimiento,
+          fechaNacimiento: this.fechaNacimiento + "T00:00:00",
         };
-
         await guardarFachada(pasajero);
+        this.mostrarAlerta("Pasajero registrado exitosamente");
         this.limpiarFormulario();
       } catch (error) {
-        console.error("Error:", error);
+        console.log("Error:", error);
       }
     },
 
@@ -286,7 +337,7 @@ export default {
       this.nombre = "";
       this.apellido = "";
       this.cedula = "";
-      this.email = "";
+      this.correo = "";
       this.telefono = "";
       this.fechaNacimiento = "";
     },
@@ -295,7 +346,7 @@ export default {
       try {
         this.pasajeroArr = await listarTodosFachada();
       } catch (error) {
-        console.error("Error:", error);
+        console.log("Error:", error);
       }
     },
 
@@ -303,16 +354,14 @@ export default {
       if (!this.idBuscar) {
         return;
       }
-
       try {
         const pasajero = await consultarPorIdFachada(this.idBuscar);
-
         if (pasajero) {
           this.idEditar = pasajero.id;
           this.nombreEditar = pasajero.nombre;
           this.apellidoEditar = pasajero.apellido;
           this.cedulaEditar = pasajero.cedula;
-          this.emailEditar = pasajero.email;
+          this.correoEditar = pasajero.correo;
           this.telefonoEditar = pasajero.telefono;
 
           if (pasajero.fechaNacimiento) {
@@ -322,13 +371,21 @@ export default {
           return null;
         }
       } catch (error) {
-        console.error("Error:", error);
+        this.mostrarAlerta("ID no encontrado");
+        this.cancelarEdicion();
+        console.log("Error:", error);
       }
     },
 
     async actualizar() {
-      if (!this.nombreEditar || !this.apellidoEditar || !this.cedulaEditar ||
-        !this.emailEditar || !this.telefonoEditar || !this.fechaNacimientoEditar) {
+      if (
+        !this.nombreEditar ||
+        !this.apellidoEditar ||
+        !this.cedulaEditar ||
+        !this.emailEditar ||
+        !this.telefonoEditar ||
+        !this.fechaNacimientoEditar
+      ) {
         return;
       }
 
@@ -346,7 +403,7 @@ export default {
         await actualizarFachada(this.idEditar, pasajero);
         this.cancelarEdicion();
       } catch (error) {
-        console.error("Error:", error);
+        console.log("Error:", error);
       }
     },
 
@@ -356,13 +413,14 @@ export default {
       this.nombreEditar = "";
       this.apellidoEditar = "";
       this.cedulaEditar = "";
-      this.emailEditar = "";
+      this.correoEditar = "";
       this.telefonoEditar = "";
       this.fechaNacimientoEditar = "";
     },
 
     async buscarParaEliminar() {
       if (!this.idEliminar) {
+        this.mostrarAlerta("Complete el campo");
         return;
       }
 
@@ -373,13 +431,15 @@ export default {
           this.nombreEliminar = pasajero.nombre;
           this.apellidoEliminar = pasajero.apellido;
           this.cedulaEliminar = pasajero.cedula;
-          this.emailEliminar = pasajero.email;
+          this.correoEliminar = pasajero.correo;
           this.telefonoEliminar = pasajero.telefono;
         } else {
           return null;
         }
       } catch (error) {
-        console.error("Error:", error);
+        this.mostrarAlerta("ID no encontrado");
+        this.cancelarEliminacion();
+        console.log("Error:", error);
       }
     },
 
@@ -387,8 +447,9 @@ export default {
       try {
         await borrarFachada(this.idEliminar);
         this.cancelarEliminacion();
+        this.mostrarAlerta("Pasajero eliminado exitosamente");
       } catch (error) {
-        console.error("Error:", error);
+        console.log("Error:", error);
       }
     },
 
@@ -397,19 +458,34 @@ export default {
       this.nombreEliminar = "";
       this.apellidoEliminar = "";
       this.cedulaEliminar = "";
-      this.emailEliminar = "";
+      this.correoEliminar = "";
       this.telefonoEliminar = "";
+    },
+
+    async buscarPorCedula() {
+      if (!this.idCedula) {
+        this.mostrarAlerta("Ingrese la cédula");
+        return;
+      }
+      try {
+        const res = await consultarPorCedulaFachada(this.idCedula);
+        this.pasajeroArr = [res];
+      } catch (error) {
+        this.mostrarAlerta("Cédula no existe");
+        this.idCedula = "";
+        console.log("Error:", error);
+      }
     },
 
     formatDate(date) {
       if (!date) return "";
       const d = new Date(date);
-      return d.toLocaleDateString("es-EC");
+      return d.toLocaleDateString("es-EC", {
+        day: "2-digit",
+        month: "2-digit",
+        year: "numeric",
+      });
     },
-  },
-
-  mounted() {
-    this.listar();
   },
 };
 </script>
@@ -420,7 +496,7 @@ export default {
   justify-content: center;
   min-height: 100vh;
   background-color: #f3f4f6;
-  font-family: 'Inter', sans-serif;
+  font-family: "Inter", sans-serif;
   padding: 40px 20px;
 }
 
@@ -431,6 +507,35 @@ export default {
   border-radius: 24px;
   box-shadow: 0 20px 60px rgba(0, 0, 0, 0.08);
   padding: 40px;
+}
+
+.mensaje-container {
+  margin-top: 1rem;
+  animation: slideDown 0.3s ease-out;
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.mensaje {
+  display: inline-block;
+  padding: 12px 24px;
+  border-radius: 12px;
+  font-weight: 600;
+  font-size: 0.95rem;
+  background-color: #eef2ff;
+  color: #4f46e5;
+  border: 1px solid rgba(79, 70, 229, 0.2);
+  box-shadow: 0 4px 12px rgba(79, 70, 229, 0.1);
+  animation: fadeIn 0.3s ease-in-out;
 }
 
 .logo-color {
