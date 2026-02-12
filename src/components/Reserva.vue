@@ -356,7 +356,7 @@ export default {
     async comprobarReserva() {
 
       if (!this.cedula || !this.aerolinea) {
-        alert("Ingrese la cédula y la aerolínea");
+        console.log("Ingrese la cédula y la aerolínea");
         return;
       }
 
@@ -366,12 +366,13 @@ export default {
         const avion = await buscarPorAerolineaFachada(this.aerolinea);
 
         if (!pasajero) {
-          alert("Pasajero no encontrado");
+          console.log("pasajero no encontrado");
+          
           return;
         }
 
         if (!avion) {
-          alert("Aerolínea no encontrada");
+          console.log("aerolinea no encontrada");
           return;
         }
 
