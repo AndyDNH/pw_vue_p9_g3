@@ -6,12 +6,6 @@ import AvionView from  '@/views/AvionView.vue';
 
 const routes = [
   {
-    path: '/about',
-    name: 'about',
-    
-    component: () => import(/* webpackChunkName: "about" */ '../views/AboutView.vue')
-  },
-  {
     path: '/pasajero',
     name: 'pasajero',
     component: PasajeroView,
@@ -58,8 +52,7 @@ router.beforeEach((to, from, next) => {
         name: 'login',
         query: { redirect: to.fullPath }
       })
-    }
-    else {
+    } else {
       next();
     }
   }
