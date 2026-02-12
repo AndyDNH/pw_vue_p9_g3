@@ -15,7 +15,7 @@
           Crear Reserva
         </button>
         <button :class="['tab', { active: activeTab === 'lista' }]" @click="activeTab = 'lista'">
-          Lista de Reservas
+          Reporte de Reservas
         </button>
         <button :class="['tab', { active: activeTab === 'editar' }]" @click="activeTab = 'editar'">
           Editar Reserva
@@ -30,7 +30,37 @@
         <div class="form-card">
           <h3 class="form-title">Crear Nueva Reserva</h3>
 
-          <div class="pasajero-form">
+          <!-- PRIMER PASO -->
+          <div v-if="!reservaValidada" class="form-grid">
+
+            <div class="form-group">
+              <label>Cédula:</label>
+              <input v-model="cedula" type="text" placeholder="0102030405" />
+            </div>
+
+            <div class="form-group">
+              <label>Aerolínea:</label>
+              <!-- usar select para no ingresar manualmente -->
+              <select v-model="aerolinea">
+                <option disabled value="">Seleccione</option>
+                <option>LATAM</option>
+                <option>Avianca</option>
+              </select>
+
+            </div>
+
+            <div class="form-actions">
+              <button @click="comprobarReserva" class="btn-general">
+                Comprobar
+              </button>
+            </div>
+
+          </div>
+
+
+          <!-- SEGUNDO PASO -->
+          <div v-else class="pasajero-form">
+
             <div class="form-grid">
               <div class="form-group">
                 <label>Fecha:</label>
@@ -54,7 +84,7 @@
 
               <div class="form-group">
                 <label>Precio:</label>
-                <input v-model.number="precio" type="number" step="0.01" min="0" placeholder="120.50" />
+                <input v-model.number="precio" type="number" step="0.01" min="0" />
               </div>
 
               <div class="form-group">
@@ -64,24 +94,30 @@
 
               <div class="form-group">
                 <label>Asiento:</label>
-                <input v-model.number="asiento" type="number" min="1" placeholder="15" />
+                <input v-model.number="asiento" type="number" min="1" />
               </div>
 
               <div class="form-group">
                 <label>ID Avión:</label>
-                <input v-model.number="idAvion" type="number" min="1" placeholder="1" />
+                <input v-model.number="idAvion" type="number" min="1" />
               </div>
 
               <div class="form-group full-width">
                 <label>ID Pasajero:</label>
-                <input v-model.number="idPasajero" type="number" min="1" placeholder="1" />
+                <input v-model.number="idPasajero" type="number" min="1" />
               </div>
             </div>
 
             <div class="form-actions">
-              <button @click="limpiarFormulario" class="btn-limpiar">Limpiar</button>
-              <button @click="crear" class="btn-general">Guardar</button>
+              <button @click="limpiarFormulario" class="btn-limpiar">
+                Limpiar
+              </button>
+
+              <button @click="crear" class="btn-general">
+                Guardar
+              </button>
             </div>
+
           </div>
         </div>
       </div>
@@ -138,12 +174,8 @@
           <h3 class="form-title">Editar Reserva</h3>
 
           <div class="seccion-buscar">
-            <input
-              v-model.number="idBuscar"
-              type="number"
-              placeholder="ID de la reserva a editar"
-              class="input-buscar"
-            />
+            <input v-model.number="idBuscar" type="number" placeholder="ID de la reserva a editar"
+              class="input-buscar" />
             <button @click="buscarParaEditar" class="btn-buscar">Buscar</button>
           </div>
 
@@ -218,12 +250,8 @@
           <h3 class="form-title">Eliminar Reserva</h3>
 
           <div class="seccion-buscar">
-            <input
-              v-model.number="idEliminar"
-              type="number"
-              placeholder="ID de la reserva a eliminar"
-              class="input-buscar"
-            />
+            <input v-model.number="idEliminar" type="number" placeholder="ID de la reserva a eliminar"
+              class="input-buscar" />
             <button @click="buscarParaEliminar" class="btn-buscar">Buscar</button>
           </div>
 
@@ -267,12 +295,22 @@ import {
   actualizarFachada,
   borrarFachada,
 } from "../clients/ReservaClient.js";
+//importar por aerolinea y por cedula para buscar en editar y eliminar
+import { buscarPorAerolineaFachada } from "../clients/AvionClient.js";
+import { buscarPorCedulaFachada } from "../clients/PasajeroClient.js";
 
 export default {
   data() {
     return {
       activeTab: "crear",
       reservaArr: [],
+
+      reservaValidada: false,
+
+      //Consultar cedula para crear
+      cedula: "",
+      //Consultar aerolinea para crear
+      aerolinea: "",
 
       // CREAR
       fecha: "",
@@ -313,6 +351,53 @@ export default {
   },
 
   methods: {
+
+    //metodo para consultar por cedula y aerolinea
+    async comprobarReserva() {
+
+      if (!this.cedula || !this.aerolinea) {
+        alert("Ingrese la cédula y la aerolínea");
+        return;
+      }
+
+      try {
+
+        const pasajero = await buscarPorCedulaFachada(this.cedula);
+        const avion = await buscarPorAerolineaFachada(this.aerolinea);
+
+        if (!pasajero) {
+          alert("Pasajero no encontrado");
+          return;
+        }
+
+        if (!avion) {
+          alert("Aerolínea no encontrada");
+          return;
+        }
+
+        // MUY IMPORTANTE
+        this.idPasajero = pasajero.id;
+        this.idAvion = avion.id;
+
+        // DESBLOQUEA EL FORMULARIO
+        this.reservaValidada = true;
+
+      } catch (error) {
+        console.error(error);
+      }
+    },
+
+    nuevaReserva() {
+
+      this.reservaValidada = false;
+
+      this.cedula = "";
+      this.aerolinea = "";
+
+      this.limpiarFormulario();
+    },
+
+
     async crear() {
       if (!this.fecha || !this.hora || !this.origen || !this.destino || this.precio == null || !this.estado || this.asiento == null || !this.idAvion || !this.idPasajero) {
         return;
@@ -332,7 +417,7 @@ export default {
         };
 
         await guardarFachada(reserva);
-        this.limpiarFormulario();
+        this.nuevaReserva();
       } catch (error) {
         console.error("Error:", error);
       }
@@ -479,58 +564,308 @@ export default {
 
 <style scoped>
 /* Reutilizo EXACTO el CSS base de Pasajero */
-.main-wrapper { display:flex; justify-content:center; min-height:100vh; background-color:#f3f4f6; font-family:'Inter', sans-serif; padding:40px 20px; }
-.card { width:100%; max-width:1400px; background:white; border-radius:24px; box-shadow:0 20px 60px rgba(0,0,0,0.08); padding:40px; }
-.logo-color { color:#4f46e5; font-size:2rem; font-weight:bold; margin-bottom:5px; }
-h2 { font-size:1.8rem; color:#111827; margin:0; font-weight:700; }
-.subtitle { color:#6b7280; margin:5px 0 0 0; font-size:0.95rem; }
-.card-header { margin-bottom:30px; }
+.main-wrapper {
+  display: flex;
+  justify-content: center;
+  min-height: 100vh;
+  background-color: #f3f4f6;
+  font-family: 'Inter', sans-serif;
+  padding: 40px 20px;
+}
 
-.tabs { display:flex; gap:0.5rem; margin-bottom:2rem; border-bottom:2px solid #e5e7eb; flex-wrap:wrap; }
-.tab { padding:0.75rem 1.5rem; background:none; border:none; border-bottom:3px solid transparent; cursor:pointer; font-weight:500; color:#6b7280; transition:all 0.2s; }
-.tab:hover { color:#4f46e5; background-color:#f9fafb; }
-.tab.active { color:#4f46e5; border-bottom-color:#4f46e5; font-weight:600; }
+.card {
+  width: 100%;
+  max-width: 1400px;
+  background: white;
+  border-radius: 24px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.08);
+  padding: 40px;
+}
 
-.tab-content { animation: fadeIn 0.3s; }
-@keyframes fadeIn { from { opacity:0; transform: translateY(10px);} to { opacity:1; transform: translateY(0);} }
+.logo-color {
+  color: #4f46e5;
+  font-size: 2rem;
+  font-weight: bold;
+  margin-bottom: 5px;
+}
 
-.seccion-buscar { display:flex; gap:1rem; margin-bottom:2rem; flex-wrap:wrap; }
-.input-buscar { flex:1; min-width:250px; padding:0.75rem 1rem; border:1px solid #d1d5db; border-radius:8px; font-size:1rem; }
-.input-buscar:focus { outline:none; border-color:#4f46e5; box-shadow:0 0 0 3px rgba(79,70,229,0.1); }
+h2 {
+  font-size: 1.8rem;
+  color: #111827;
+  margin: 0;
+  font-weight: 700;
+}
 
-.btn-general, .btn-buscar { padding:12px 24px; background-color:#4f46e5; color:white; border:none; border-radius:8px; font-weight:600; cursor:pointer; box-shadow:0 4px 14px rgba(79,70,229,0.4); transition:all 0.2s; }
-.btn-general:hover, .btn-buscar:hover { background-color:#4338ca; transform: translateY(-2px); }
+.subtitle {
+  color: #6b7280;
+  margin: 5px 0 0 0;
+  font-size: 0.95rem;
+}
 
-.btn-limpiar { padding:12px 24px; background-color:#f3f4f6; color:#374151; border:none; border-radius:8px; font-weight:600; cursor:pointer; transition:all 0.2s; }
-.btn-limpiar:hover { background-color:#e5e7eb; }
+.card-header {
+  margin-bottom: 30px;
+}
 
-.btn-eliminar { padding:12px 24px; background-color:#ef4444; color:white; border:none; border-radius:8px; font-weight:600; cursor:pointer; }
-.btn-eliminar:hover { background-color:#dc2626; }
+.tabs {
+  display: flex;
+  gap: 0.5rem;
+  margin-bottom: 2rem;
+  border-bottom: 2px solid #e5e7eb;
+  flex-wrap: wrap;
+}
 
-table { width:100%; border-collapse:collapse; text-align:left; }
-th { background-color:#f9fafb; color:#374151; font-weight:600; font-size:0.85rem; text-transform:uppercase; letter-spacing:0.05em; padding:16px; border-bottom:2px solid #e5e7eb; }
-td { padding:16px; border-bottom:1px solid #f3f4f6; color:#4b5563; font-size:0.95rem; vertical-align:middle; }
-.font-bold { font-weight:600; color:#111827; }
-tr:hover td { background-color:#f9fafb; }
+.tab {
+  padding: 0.75rem 1.5rem;
+  background: none;
+  border: none;
+  border-bottom: 3px solid transparent;
+  cursor: pointer;
+  font-weight: 500;
+  color: #6b7280;
+  transition: all 0.2s;
+}
 
-.estado-vacio { text-align:center; padding:40px; color:#9ca3af; }
+.tab:hover {
+  color: #4f46e5;
+  background-color: #f9fafb;
+}
 
-.form-card { background:#f9fafb; padding:2rem; border-radius:16px; }
-.form-title { font-size:1.5rem; color:#111827; margin-bottom:1.5rem; font-weight:600; }
-.form-grid { display:grid; grid-template-columns: repeat(2, 1fr); gap:1.5rem; margin-bottom:2rem; }
-.full-width { grid-column: span 2; }
-.form-group { display:flex; flex-direction:column; gap:0.5rem; }
-label { font-weight:500; color:#374151; font-size:0.95rem; }
+.tab.active {
+  color: #4f46e5;
+  border-bottom-color: #4f46e5;
+  font-weight: 600;
+}
 
-input { padding:0.75rem; border:1px solid #d1d5db; border-radius:8px; font-size:1rem; background-color:white; }
-input:focus { outline:none; border-color:#4f46e5; box-shadow:0 0 0 3px rgba(79,70,229,0.1); }
-input:disabled { background-color:#f3f4f6; color:#6b7280; }
+.tab-content {
+  animation: fadeIn 0.3s;
+}
 
-.form-actions { display:flex; justify-content:flex-end; gap:1rem; padding-top:1rem; border-top:2px solid #e5e7eb; }
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
 
-.delete-preview { background:white; padding:1.5rem; border-radius:12px; margin-top:1rem; }
-.delete-preview h4 { color:#ef4444; margin-bottom:1rem; font-size:1.25rem; }
-.info-grid { display:grid; grid-template-columns: repeat(2, 1fr); gap:1rem; margin-bottom:1.5rem; padding:1rem; background:#fef2f2; border-radius:8px; }
-.info-grid div { color:#4b5563; }
-.info-grid strong { color:#111827; }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.seccion-buscar {
+  display: flex;
+  gap: 1rem;
+  margin-bottom: 2rem;
+  flex-wrap: wrap;
+}
+
+.input-buscar {
+  flex: 1;
+  min-width: 250px;
+  padding: 0.75rem 1rem;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  font-size: 1rem;
+}
+
+.input-buscar:focus {
+  outline: none;
+  border-color: #4f46e5;
+  box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
+}
+
+.btn-general,
+.btn-buscar {
+  padding: 12px 24px;
+  background-color: #4f46e5;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  box-shadow: 0 4px 14px rgba(79, 70, 229, 0.4);
+  transition: all 0.2s;
+}
+
+.btn-general:hover,
+.btn-buscar:hover {
+  background-color: #4338ca;
+  transform: translateY(-2px);
+}
+
+.btn-limpiar {
+  padding: 12px 24px;
+  background-color: #f3f4f6;
+  color: #374151;
+  border: none;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.btn-limpiar:hover {
+  background-color: #e5e7eb;
+}
+
+.btn-eliminar {
+  padding: 12px 24px;
+  background-color: #ef4444;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.btn-eliminar:hover {
+  background-color: #dc2626;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: left;
+}
+
+th {
+  background-color: #f9fafb;
+  color: #374151;
+  font-weight: 600;
+  font-size: 0.85rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  padding: 16px;
+  border-bottom: 2px solid #e5e7eb;
+}
+
+td {
+  padding: 16px;
+  border-bottom: 1px solid #f3f4f6;
+  color: #4b5563;
+  font-size: 0.95rem;
+  vertical-align: middle;
+}
+
+.font-bold {
+  font-weight: 600;
+  color: #111827;
+}
+
+tr:hover td {
+  background-color: #f9fafb;
+}
+
+.estado-vacio {
+  text-align: center;
+  padding: 40px;
+  color: #9ca3af;
+}
+
+.form-card {
+  background: #f9fafb;
+  padding: 2rem;
+  border-radius: 16px;
+}
+
+.form-title {
+  font-size: 1.5rem;
+  color: #111827;
+  margin-bottom: 1.5rem;
+  font-weight: 600;
+}
+
+.form-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1.5rem;
+  margin-bottom: 2rem;
+}
+
+.full-width {
+  grid-column: span 2;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+label {
+  font-weight: 500;
+  color: #374151;
+  font-size: 0.95rem;
+}
+
+input {
+  padding: 0.75rem;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  font-size: 1rem;
+  background-color: white;
+}
+
+select {
+  padding: 0.75rem;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  font-size: 1rem;
+  background-color: white;
+}
+select:focus {
+  outline: none;
+  border-color: #4f46e5;
+  box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
+}
+
+input:focus {
+  outline: none;
+  border-color: #4f46e5;
+  box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
+}
+
+input:disabled {
+  background-color: #f3f4f6;
+  color: #6b7280;
+}
+
+.form-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 1rem;
+  padding-top: 1rem;
+  border-top: 2px solid #e5e7eb;
+}
+
+.delete-preview {
+  background: white;
+  padding: 1.5rem;
+  border-radius: 12px;
+  margin-top: 1rem;
+}
+
+.delete-preview h4 {
+  color: #ef4444;
+  margin-bottom: 1rem;
+  font-size: 1.25rem;
+}
+
+.info-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+  padding: 1rem;
+  background: #fef2f2;
+  border-radius: 8px;
+}
+
+.info-grid div {
+  color: #4b5563;
+}
+
+.info-grid strong {
+  color: #111827;
+}
 </style>

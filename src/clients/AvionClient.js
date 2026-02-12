@@ -49,8 +49,7 @@ const borrar = async (id) => {
 const buscarPorAerolinea = async (aerolinea) => {
   const TOKEN = localStorage.getItem("token");
 
-  const res = await axios.get(URL + "/aerolinea", {
-    params: { aerolinea: aerolinea },
+  const res = await axios.get(`${URL}/aerolinea/${aerolinea}`, {
     headers: { Authorization: "Bearer " + TOKEN },
   });
 

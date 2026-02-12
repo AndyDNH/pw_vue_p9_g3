@@ -36,8 +36,8 @@ const borrar = async (id) => {
 }
 
 export const listarTodosFachada = async () => {
-    return await listarTodos();
-}
+  return await listarTodos();
+};
 
 export const consultarPorIdFachada = async (id) => {
     return await consultarPorId(id);
@@ -48,11 +48,15 @@ export const consultarPorCedulaFachada = async (cedula) => {
 }
 
 export const guardarFachada = async (body) => {
-    return await guardar(body);
-}
+  return await guardar(body);
+};
 export const actualizarFachada = async (id, body) => {
-    return await actualizar(id, body);
-}
+  return await actualizar(id, body);
+};
 export const borrarFachada = async (id) => {
-    return await borrar(id);
+  return await borrar(id);
+};
+//cedula
+export const buscarPorCedulaFachada = async (cedula) => {
+  return await buscarPorCedula(cedula);
 }

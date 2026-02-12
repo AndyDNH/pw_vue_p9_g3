@@ -15,7 +15,7 @@
           Crear Avión
         </button>
         <button :class="['tab', { active: activeTab === 'lista' }]" @click="activeTab = 'lista'">
-          Lista de Aviones
+          Reporte de Aviones
         </button>
         <button :class="['tab', { active: activeTab === 'editar' }]" @click="activeTab = 'editar'">
           Editar Avión
@@ -44,7 +44,11 @@
 
               <div class="form-group">
                 <label>Aerolínea:</label>
-                <input v-model="aerolinea" type="text" placeholder="LATAM" />
+                <select v-model="aerolinea">
+                  <option value="" disabled>Selecciona una aerolínea</option>
+                  <option value="Avianca">Avianca</option>
+                  <option value="LATAM">LATAM</option>
+                </select>
               </div>
 
               <div class="form-group">
@@ -71,12 +75,11 @@
         <div class="seccion-buscar">
           <button @click="listar" class="btn-general">Ver Todos</button>
 
-          <input
-            v-model="aerolineaFiltro"
-            type="text"
-            placeholder="Buscar por aerolínea (opcional)"
-            class="input-buscar"
-          />
+          <select v-model="aerolineaFiltro" placeholder="Buscar por aerolínea (opcional)" class="input-buscar">
+            <option value="" disabled>Selecciona una aerolínea</option>
+            <option value="Avianca">Avianca</option>
+            <option value="LATAM">LATAM</option>
+          </select>
           <button @click="buscarPorAerolinea" class="btn-buscar">Buscar</button>
         </div>
 
@@ -118,12 +121,7 @@
           <h3 class="form-title">Editar Avión</h3>
 
           <div class="seccion-buscar">
-            <input
-              v-model.number="idBuscar"
-              type="number"
-              placeholder="ID del avión a editar"
-              class="input-buscar"
-            />
+            <input v-model.number="idBuscar" type="number" placeholder="ID del avión a editar" class="input-buscar" />
             <button @click="buscarParaEditar" class="btn-buscar">Buscar</button>
           </div>
 
@@ -178,12 +176,8 @@
           <h3 class="form-title">Eliminar Avión</h3>
 
           <div class="seccion-buscar">
-            <input
-              v-model.number="idEliminar"
-              type="number"
-              placeholder="ID del avión a eliminar"
-              class="input-buscar"
-            />
+            <input v-model.number="idEliminar" type="number" placeholder="ID del avión a eliminar"
+              class="input-buscar" />
             <button @click="buscarParaEliminar" class="btn-buscar">Buscar</button>
           </div>
 
@@ -301,12 +295,16 @@ export default {
 
     async buscarPorAerolinea() {
       if (!this.aerolineaFiltro) {
-        // si está vacío, solo lista todo
         return await this.listar();
       }
 
       try {
-        this.avionArr = await buscarPorAerolineaFachada(this.aerolineaFiltro);
+
+        const avion = await buscarPorAerolineaFachada(this.aerolineaFiltro);
+
+        //  convierte a array
+        this.avionArr = avion ? [avion] : [];
+
       } catch (error) {
         console.error("Error:", error);
       }
@@ -488,8 +486,15 @@ h2 {
 }
 
 @keyframes fadeIn {
-  from { opacity: 0; transform: translateY(10px); }
-  to { opacity: 1; transform: translateY(0); }
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 .seccion-buscar {
@@ -636,6 +641,20 @@ label {
   font-weight: 500;
   color: #374151;
   font-size: 0.95rem;
+}
+
+select {
+  padding: 0.75rem;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  font-size: 1rem;
+  background-color: white;
+}
+
+select:focus {
+  outline: none;
+  border-color: #4f46e5;
+  box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
 }
 
 input {
