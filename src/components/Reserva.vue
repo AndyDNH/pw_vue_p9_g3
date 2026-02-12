@@ -25,6 +25,14 @@
         </button>
       </div>
 
+      <div
+        v-if="mostrarMensaje"
+        class="mensaje-container"
+        style="margin-bottom: 20px; display: flex; justify-content: center"
+      >
+        <span class="mensaje">{{ mensaje }}</span>
+      </div>
+
       <!-- TAB 1: CREAR -->
       <div v-if="activeTab === 'crear'" class="tab-content">
         <div class="form-card">
@@ -351,11 +359,19 @@ export default {
   },
 
   methods: {
+    mostrarAlerta(texto) {
+      this.mensaje = texto;
+      this.mostrarMensaje = true;
+      setTimeout(() => {
+        this.mostrarMensaje = false;
+      }, 3000);
+    },
 
     //metodo para consultar por cedula y aerolinea
     async comprobarReserva() {
 
       if (!this.cedula || !this.aerolinea) {
+        this.mostrarAlerta("Por favor ingrese la cédula y la aerolínea");
         console.log("Ingrese la cédula y la aerolínea");
         return;
       }
@@ -367,12 +383,13 @@ export default {
 
         if (!pasajero) {
           console.log("pasajero no encontrado");
-          
+          this.mostrarAlerta("Pasajero no encontrado");
           return;
         }
 
         if (!avion) {
           console.log("aerolinea no encontrada");
+          this.mostrarAlerta("Aerolínea no encontrada");
           return;
         }
 
@@ -401,6 +418,7 @@ export default {
 
     async crear() {
       if (!this.fecha || !this.hora || !this.origen || !this.destino || this.precio == null || !this.estado || this.asiento == null || !this.idAvion || !this.idPasajero) {
+        this.mostrarAlerta("Por favor completa todos los campos");
         return;
       }
 
@@ -418,8 +436,10 @@ export default {
         };
 
         await guardarFachada(reserva);
+        this.mostrarAlerta("Reserva creada correctamente");
         this.nuevaReserva();
       } catch (error) {
+        this.mostrarAlerta("Error al crear la reserva");
         console.error("Error:", error);
       }
     },
@@ -445,7 +465,10 @@ export default {
     },
 
     async buscarParaEditar() {
-      if (!this.idBuscar) return;
+      if (!this.idBuscar) {
+        this.mostrarAlerta("Por favor ingrese un ID");
+        return;
+      }
 
       try {
         const r = await consultarPorIdFachada(this.idBuscar);
@@ -465,12 +488,14 @@ export default {
           return null;
         }
       } catch (error) {
+        this.mostrarAlerta("Error al buscar la reserva");
         console.error("Error:", error);
       }
     },
 
     async actualizar() {
       if (!this.idEditar || !this.fechaEditar || !this.horaEditar || !this.origenEditar || !this.destinoEditar || this.precioEditar == null || !this.estadoEditar || this.asientoEditar == null || !this.idAvionEditar || !this.idPasajeroEditar) {
+        this.mostrarAlerta("Por favor completa todos los campos");
         return;
       }
 
@@ -489,9 +514,11 @@ export default {
         };
 
         await actualizarFachada(this.idEditar, reserva);
+        this.mostrarAlerta("Reserva actualizada correctamente");
         this.cancelarEdicion();
       } catch (error) {
         console.error("Error:", error);
+        this.mostrarAlerta("Error al actualizar la reserva");
       }
     },
 
@@ -511,10 +538,14 @@ export default {
     },
 
     async buscarParaEliminar() {
-      if (!this.idEliminar) return;
+      if (!this.idEliminar) {
+        this.mostrarAlerta("Por favor ingrese un ID");
+        return;
+      }
 
       try {
         const r = await consultarPorIdFachada(this.idEliminar);
+
 
         if (r) {
           this.fechaEliminar = r.fecha;
@@ -527,19 +558,23 @@ export default {
           this.idAvionEliminar = r.idAvion;
           this.idPasajeroEliminar = r.idPasajero;
         } else {
+          this.mostrarAlerta("Reserva no encontrada");
           return null;
         }
       } catch (error) {
         console.error("Error:", error);
+        this.mostrarAlerta("Error al buscar la reserva");
       }
     },
 
     async confirmarEliminacion() {
       try {
         await borrarFachada(this.idEliminar);
+        this.mostrarAlerta("Reserva eliminada correctamente");
         this.cancelarEliminacion();
       } catch (error) {
         console.error("Error:", error);
+        this.mostrarAlerta("Error al eliminar la reserva");
       }
     },
 
