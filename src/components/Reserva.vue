@@ -21,7 +21,7 @@
           Editar Reserva
         </button>
         <button :class="['tab', { active: activeTab === 'eliminar' }]" @click="activeTab = 'eliminar'">
-          Eliminar Reserva
+          Cancelar Reserva
         </button>
       </div>
 
@@ -255,16 +255,16 @@
       <!-- TAB 4: ELIMINAR -->
       <div v-if="activeTab === 'eliminar'" class="tab-content">
         <div class="form-card">
-          <h3 class="form-title">Eliminar Reserva</h3>
+          <h3 class="form-title">Cancelar Reserva</h3>
 
           <div class="seccion-buscar">
-            <input v-model.number="idEliminar" type="number" placeholder="ID de la reserva a eliminar"
+            <input v-model.number="idEliminar" type="number" placeholder="ID de la reserva a cancelar"
               class="input-buscar" />
             <button @click="buscarParaEliminar" class="btn-buscar">Buscar</button>
           </div>
 
           <div v-if="origenEliminar" class="delete-preview">
-            <h4>¿Eliminar esta reserva?</h4>
+            <h4>¿Cancelar esta reserva?</h4>
 
             <div class="info-grid">
               <div><strong>ID:</strong> {{ idEliminar }}</div>
@@ -281,13 +281,13 @@
             <div class="form-actions">
               <button @click="cancelarEliminacion" class="btn-limpiar">Cancelar</button>
               <button @click="confirmarEliminacion" class="btn-eliminar">
-                Eliminar Permanentemente
+                Cancelar Reserva
               </button>
             </div>
           </div>
 
           <div v-else class="estado-vacio" style="padding: 40px">
-            Ingresa un ID y haz clic en "Buscar" para eliminar una reserva.
+            Ingresa un ID y haz clic en "Buscar" para cancelar una reserva.
           </div>
         </div>
       </div>
@@ -573,15 +573,33 @@ export default {
     },
 
     async confirmarEliminacion() {
-      try {
-        await borrarFachada(this.idEliminar);
-        this.mostrarAlerta("Reserva eliminada correctamente");
-        this.cancelarEliminacion();
-      } catch (error) {
-        console.error("Error:", error);
-        this.mostrarAlerta("Error al eliminar la reserva");
-      }
-    },
+  try {
+
+    const reserva = {
+      id: this.idEliminar,
+      fecha: this.fechaEliminar,
+      hora: this.horaEliminar,
+      origen: this.origenEliminar,
+      destino: this.destinoEliminar,
+      precio: this.precioEliminar,
+      estado: "CANCELADO",
+      asiento: this.asientoEliminar,
+      idAvion: this.idAvionEliminar,
+      idPasajero: this.idPasajeroEliminar,
+    };
+
+    await actualizarFachada(this.idEliminar, reserva);
+
+    this.mostrarAlerta("Reserva cancelada correctamente");
+
+    this.cancelarEliminacion();
+
+  } catch (error) {
+    console.error("Error:", error);
+    this.mostrarAlerta("Error al cancelar la reserva");
+  }
+}
+,
 
     cancelarEliminacion() {
       this.idEliminar = null;
