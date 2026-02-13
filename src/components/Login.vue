@@ -25,14 +25,13 @@
         <form @submit.prevent="login">
           <div class="input-group">
             <label for="usuario">Usuario</label>
-            <input id="usuario" type="text" v-model="usuario" placeholder="Andres">
+            <input id="usuario" type="text" v-model="usuario" placeholder="Ingresa tu usuario">
           </div>
 
           <div class="input-group">
             <label for="password">Contraseña</label>
             <div class="password-wrapper">
               <input id="password" type="password" v-model="password" placeholder="••••••••••••">
-              <span class="eye-icon">👁️</span>
             </div>
           </div>
 
@@ -64,7 +63,7 @@ export default {
       this.mensaje = texto;
       this.esError = error;
       this.mostrarMensaje = true;
-      
+
       // Si es error, lo quitamos a los 3 segundos
       if (error) {
         setTimeout(() => {
@@ -114,7 +113,8 @@ export default {
   border-radius: 10px;
   font-weight: 600;
   font-size: 0.85rem;
-  background-color: #eef2ff; /* Azul para éxito */
+  background-color: #eef2ff;
+  /* Azul para éxito */
   color: #4f46e5;
   border: 1px solid rgba(79, 70, 229, 0.2);
   box-shadow: 0 4px 12px rgba(79, 70, 229, 0.1);
@@ -122,15 +122,23 @@ export default {
 }
 
 .mensaje-error {
-  background-color: #fef2f2; /* Rojo para error */
+  background-color: #fef2f2;
+  /* Rojo para error */
   color: #ef4444;
   border: 1px solid rgba(239, 68, 68, 0.2);
   box-shadow: 0 4px 12px rgba(239, 68, 68, 0.1);
 }
 
 @keyframes slideDown {
-  from { opacity: 0; transform: translateY(-10px); }
-  to { opacity: 1; transform: translateY(0); }
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 /* --- TUS ESTILOS EXISTENTES --- */
@@ -158,8 +166,8 @@ export default {
   flex: 1;
   border-radius: 20px;
   background: radial-gradient(circle at top left, #a5f3fc, transparent 50%),
-              radial-gradient(circle at bottom right, #7e22ce, transparent 50%),
-              linear-gradient(135deg, #3b82f6, #60a5fa);
+    radial-gradient(circle at bottom right, #7e22ce, transparent 50%),
+    linear-gradient(135deg, #3b82f6, #60a5fa);
   background-size: 150% 150%;
   padding: 40px;
   display: flex;

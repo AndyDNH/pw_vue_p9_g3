@@ -47,7 +47,7 @@ const borrar = async (id) => {
 };
 
 // FACHADAS
-export const consultarTodosFachada = async () => {
+export const consultarTodosReservaFachada = async () => {
   return await consultarTodos();
 };
 

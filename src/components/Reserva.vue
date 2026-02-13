@@ -25,11 +25,8 @@
         </button>
       </div>
 
-      <div
-        v-if="mostrarMensaje"
-        class="mensaje-container"
-        style="margin-bottom: 20px; display: flex; justify-content: center"
-      >
+      <div v-if="mostrarMensaje" class="mensaje-container"
+        style="margin-bottom: 20px; display: flex; justify-content: center">
         <span class="mensaje">{{ mensaje }}</span>
       </div>
 
@@ -48,11 +45,9 @@
 
             <div class="form-group">
               <label>Aerolínea:</label>
-              <!-- usar select para no ingresar manualmente -->
               <select v-model="aerolinea">
                 <option disabled value="">Seleccione</option>
-                <option>LATAM</option>
-                <option>Avianca</option>
+                <option v-for="item in listaAerolineas" :key="item" :value="item">{{ item }}</option>
               </select>
 
             </div>
@@ -297,14 +292,13 @@
 
 <script>
 import {
-  consultarTodosFachada,
+  consultarTodosReservaFachada,
   consultarPorIdFachada,
   guardarFachada,
   actualizarFachada,
   borrarFachada,
 } from "../clients/ReservaClient.js";
-//importar por aerolinea y por cedula para buscar en editar y eliminar
-import { buscarPorAerolineaFachada } from "../clients/AvionClient.js";
+import { buscarPorAerolineaFachada, consultarTodosFachada } from "../clients/AvionClient.js";
 import { consultarPorCedulaFachada } from "../clients/PasajeroClient.js";
 
 export default {
@@ -316,13 +310,11 @@ export default {
 
 
       reservaValidada: false,
-
-      //Consultar cedula para crear
       cedula: "",
-      //Consultar aerolinea para crear
       aerolinea: "",
+      listaAerolineas: [],
 
-      // CREAR
+      // Crear
       fecha: "",
       hora: "",
       origen: "",
@@ -333,7 +325,7 @@ export default {
       idAvion: null,
       idPasajero: null,
 
-      // EDITAR
+      // Editar
       idBuscar: null,
       idEditar: null,
       fechaEditar: "",
@@ -346,7 +338,7 @@ export default {
       idAvionEditar: null,
       idPasajeroEditar: null,
 
-      // ELIMINAR
+      // 
       idEliminar: null,
       fechaEliminar: "",
       horaEliminar: "",
@@ -369,46 +361,51 @@ export default {
       }, 3000);
     },
 
+    async cargarAerolineas() {
+      const aviones = await consultarTodosFachada();
+      this.listaAerolineas = aviones.map(a => a.aerolinea);
+    },
+
     async comprobarReserva() {
 
-  if (!this.cedula || !this.aerolinea) {
-    this.mostrarAlerta("Por favor ingrese la cédula y la aerolínea");
-    return;
-  }
+      if (!this.cedula || !this.aerolinea) {
+        this.mostrarAlerta("Por favor ingrese la cédula y la aerolínea");
+        return;
+      }
 
-  try {
+      try {
 
-    let pasajero = await consultarPorCedulaFachada(this.cedula);
-    let avion = await buscarPorAerolineaFachada(this.aerolinea);
+        let pasajero = await consultarPorCedulaFachada(this.cedula);
+        let avion = await buscarPorAerolineaFachada(this.aerolinea);
 
-    console.log("pasajero:", pasajero);
-    console.log("avion:", avion);
+        console.log("pasajero:", pasajero);
+        console.log("avion:", avion);
 
-    // soporta array o objeto
-    pasajero = Array.isArray(pasajero) ? pasajero[0] : pasajero;
-    avion = Array.isArray(avion) ? avion[0] : avion;
+        // soporta array o objeto
+        pasajero = Array.isArray(pasajero) ? pasajero[0] : pasajero;
+        avion = Array.isArray(avion) ? avion[0] : avion;
 
-    if (!pasajero || Object.keys(pasajero).length === 0) {
-      this.mostrarAlerta("Pasajero no encontrado");
-      return;
+        if (!pasajero || Object.keys(pasajero).length === 0) {
+          this.mostrarAlerta("Pasajero no encontrado");
+          return;
+        }
+
+        if (!avion || Object.keys(avion).length === 0) {
+          this.mostrarAlerta("Aerolínea no encontrada");
+          return;
+        }
+
+        this.idPasajero = pasajero.id;
+        this.idAvion = avion.id;
+
+        this.reservaValidada = true;
+
+      } catch (error) {
+        console.error(error);
+        this.mostrarAlerta("Error al validar datos");
+      }
     }
-
-    if (!avion || Object.keys(avion).length === 0) {
-      this.mostrarAlerta("Aerolínea no encontrada");
-      return;
-    }
-
-    this.idPasajero = pasajero.id;
-    this.idAvion = avion.id;
-
-    this.reservaValidada = true;
-
-  } catch (error) {
-    console.error(error);
-    this.mostrarAlerta("Error al validar datos");
-  }
-}
-,
+    ,
 
     nuevaReserva() {
 
@@ -463,7 +460,7 @@ export default {
 
     async listar() {
       try {
-        this.reservaArr = await consultarTodosFachada();
+        this.reservaArr = await consultarTodosReservaFachada();
       } catch (error) {
         console.error("Error:", error);
       }
@@ -573,33 +570,33 @@ export default {
     },
 
     async confirmarEliminacion() {
-  try {
+      try {
 
-    const reserva = {
-      id: this.idEliminar,
-      fecha: this.fechaEliminar,
-      hora: this.horaEliminar,
-      origen: this.origenEliminar,
-      destino: this.destinoEliminar,
-      precio: this.precioEliminar,
-      estado: "Cancelado",
-      asiento: this.asientoEliminar,
-      idAvion: this.idAvionEliminar,
-      idPasajero: this.idPasajeroEliminar,
-    };
+        const reserva = {
+          id: this.idEliminar,
+          fecha: this.fechaEliminar,
+          hora: this.horaEliminar,
+          origen: this.origenEliminar,
+          destino: this.destinoEliminar,
+          precio: this.precioEliminar,
+          estado: "Cancelado",
+          asiento: this.asientoEliminar,
+          idAvion: this.idAvionEliminar,
+          idPasajero: this.idPasajeroEliminar,
+        };
 
-    await actualizarFachada(this.idEliminar, reserva);
+        await actualizarFachada(this.idEliminar, reserva);
 
-    this.mostrarAlerta("Reserva cancelada correctamente");
+        this.mostrarAlerta("Reserva cancelada correctamente");
 
-    this.cancelarEliminacion();
+        this.cancelarEliminacion();
 
-  } catch (error) {
-    console.error("Error:", error);
-    this.mostrarAlerta("Error al cancelar la reserva");
-  }
-}
-,
+      } catch (error) {
+        console.error("Error:", error);
+        this.mostrarAlerta("Error al cancelar la reserva");
+      }
+    }
+    ,
 
     cancelarEliminacion() {
       this.idEliminar = null;
@@ -617,6 +614,7 @@ export default {
 
   mounted() {
     this.listar();
+    this.cargarAerolineas();
   },
 };
 </script>
@@ -872,6 +870,7 @@ select {
   font-size: 1rem;
   background-color: white;
 }
+
 select:focus {
   outline: none;
   border-color: #4f46e5;
@@ -927,6 +926,7 @@ input:disabled {
 .info-grid strong {
   color: #111827;
 }
+
 .mensaje-container {
   margin-top: 1rem;
   animation: slideDown 0.3s ease-out;

@@ -12,49 +12,29 @@
       </div>
 
       <div class="tabs">
-        <button
-          :class="['tab', { active: activeTab === 'lista' }]"
-          @click="activeTab = 'lista'"
-        >
+        <button :class="['tab', { active: activeTab === 'lista' }]" @click="activeTab = 'lista'">
           Reporte de Pasajeros
         </button>
-        <button
-          :class="['tab', { active: activeTab === 'crear' }]"
-          @click="activeTab = 'crear'"
-        >
+        <button :class="['tab', { active: activeTab === 'crear' }]" @click="activeTab = 'crear'">
           Crear Pasajero
         </button>
-        <button
-          :class="['tab', { active: activeTab === 'editar' }]"
-          @click="activeTab = 'editar'"
-        >
+        <button :class="['tab', { active: activeTab === 'editar' }]" @click="activeTab = 'editar'">
           Editar Pasajero
         </button>
-        <button
-          :class="['tab', { active: activeTab === 'eliminar' }]"
-          @click="activeTab = 'eliminar'"
-        >
+        <button :class="['tab', { active: activeTab === 'eliminar' }]" @click="activeTab = 'eliminar'">
           Eliminar Pasajero
         </button>
       </div>
 
-      <div
-        v-if="mostrarMensaje"
-        class="mensaje-container"
-        style="margin-bottom: 20px; display: flex; justify-content: center"
-      >
+      <div v-if="mostrarMensaje" class="mensaje-container"
+        style="margin-bottom: 20px; display: flex; justify-content: center">
         <span class="mensaje">{{ mensaje }}</span>
       </div>
 
       <div v-if="activeTab === 'lista'" class="tab-content">
         <div class="seccion-buscar">
           <button @click="listar" class="btn-general">Ver Todos</button>
-          <input
-            v-model="idCedula"
-            type="text"
-            placeholder="Buscar por cédula"
-            class="input-buscar"
-          />
+          <input v-model="idCedula" type="text" placeholder="Buscar por cédula" class="input-buscar" />
           <button @click="buscarPorCedula" class="btn-buscar">Buscar</button>
         </div>
 
@@ -106,29 +86,15 @@
               </div>
               <div class="form-group">
                 <label>Cédula:</label>
-                <input
-                  v-model="cedula"
-                  type="text"
-                  maxlength="10"
-                  placeholder="17345...."
-                />
+                <input v-model="cedula" type="text" maxlength="10" placeholder="17345...." />
               </div>
               <div class="form-group">
                 <label>Correo:</label>
-                <input
-                  v-model="correo"
-                  type="email"
-                  placeholder="ejemplo@correo.com"
-                />
+                <input v-model="correo" type="email" placeholder="ejemplo@correo.com" />
               </div>
               <div class="form-group">
                 <label>Teléfono:</label>
-                <input
-                  v-model="telefono"
-                  type="tel"
-                  maxlength="10"
-                  placeholder="0987654321"
-                />
+                <input v-model="telefono" type="tel" maxlength="10" placeholder="0987654321" />
               </div>
               <div class="form-group">
                 <label>Fecha de Nacimiento:</label>
@@ -149,12 +115,8 @@
         <div class="form-card">
           <h3 class="form-title">Editar Pasajero</h3>
           <div class="seccion-buscar">
-            <input
-              v-model.number="idBuscar"
-              type="number"
-              placeholder="ID del pasajero a editar"
-              class="input-buscar"
-            />
+            <input v-model.number="idBuscar" type="number" placeholder="ID del pasajero a editar"
+              class="input-buscar" />
             <button @click="buscarParaEditar" class="btn-buscar">Buscar</button>
           </div>
 
@@ -208,12 +170,8 @@
         <div class="form-card">
           <h3 class="form-title">Eliminar Pasajero</h3>
           <div class="seccion-buscar">
-            <input
-              v-model.number="idEliminar"
-              type="number"
-              placeholder="ID del pasajero a eliminar"
-              class="input-buscar"
-            />
+            <input v-model.number="idEliminar" type="number" placeholder="ID del pasajero a eliminar"
+              class="input-buscar" />
             <button @click="buscarParaEliminar" class="btn-buscar">
               Buscar
             </button>
@@ -329,6 +287,7 @@ export default {
         this.mostrarAlerta("Pasajero registrado exitosamente");
         this.limpiarFormulario();
       } catch (error) {
+        this.mostrarAlerta("Error al crear el oasajero");
         console.log("Error:", error);
       }
     },
@@ -386,6 +345,7 @@ export default {
         !this.telefonoEditar ||
         !this.fechaNacimientoEditar
       ) {
+        this.mostrarAlerta("Por favor completa todos los campos");
         return;
       }
 
@@ -520,6 +480,7 @@ export default {
     opacity: 0;
     transform: translateY(-10px);
   }
+
   to {
     opacity: 1;
     transform: translateY(0);
