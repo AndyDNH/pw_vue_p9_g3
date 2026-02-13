@@ -305,13 +305,15 @@ import {
 } from "../clients/ReservaClient.js";
 //importar por aerolinea y por cedula para buscar en editar y eliminar
 import { buscarPorAerolineaFachada } from "../clients/AvionClient.js";
-import { buscarPorCedulaFachada } from "../clients/PasajeroClient.js";
+import { consultarPorCedulaFachada } from "../clients/PasajeroClient.js";
 
 export default {
   data() {
     return {
       activeTab: "crear",
       reservaArr: [],
+      mostrarMensaje: false,
+
 
       reservaValidada: false,
 
@@ -367,43 +369,46 @@ export default {
       }, 3000);
     },
 
-    //metodo para consultar por cedula y aerolinea
     async comprobarReserva() {
 
-      if (!this.cedula || !this.aerolinea) {
-        this.mostrarAlerta("Por favor ingrese la cédula y la aerolínea");
-        console.log("Ingrese la cédula y la aerolínea");
-        return;
-      }
+  if (!this.cedula || !this.aerolinea) {
+    this.mostrarAlerta("Por favor ingrese la cédula y la aerolínea");
+    return;
+  }
 
-      try {
+  try {
 
-        const pasajero = await buscarPorCedulaFachada(this.cedula);
-        const avion = await buscarPorAerolineaFachada(this.aerolinea);
+    let pasajero = await consultarPorCedulaFachada(this.cedula);
+    let avion = await buscarPorAerolineaFachada(this.aerolinea);
 
-        if (!pasajero) {
-          console.log("pasajero no encontrado");
-          this.mostrarAlerta("Pasajero no encontrado");
-          return;
-        }
+    console.log("pasajero:", pasajero);
+    console.log("avion:", avion);
 
-        if (!avion) {
-          console.log("aerolinea no encontrada");
-          this.mostrarAlerta("Aerolínea no encontrada");
-          return;
-        }
+    // soporta array o objeto
+    pasajero = Array.isArray(pasajero) ? pasajero[0] : pasajero;
+    avion = Array.isArray(avion) ? avion[0] : avion;
 
-        // MUY IMPORTANTE
-        this.idPasajero = pasajero.id;
-        this.idAvion = avion.id;
+    if (!pasajero || Object.keys(pasajero).length === 0) {
+      this.mostrarAlerta("Pasajero no encontrado");
+      return;
+    }
 
-        // DESBLOQUEA EL FORMULARIO
-        this.reservaValidada = true;
+    if (!avion || Object.keys(avion).length === 0) {
+      this.mostrarAlerta("Aerolínea no encontrada");
+      return;
+    }
 
-      } catch (error) {
-        console.error(error);
-      }
-    },
+    this.idPasajero = pasajero.id;
+    this.idAvion = avion.id;
+
+    this.reservaValidada = true;
+
+  } catch (error) {
+    console.error(error);
+    this.mostrarAlerta("Error al validar datos");
+  }
+}
+,
 
     nuevaReserva() {
 
@@ -903,5 +908,22 @@ input:disabled {
 
 .info-grid strong {
   color: #111827;
+}
+.mensaje-container {
+  margin-top: 1rem;
+  animation: slideDown 0.3s ease-out;
+}
+
+.mensaje {
+  display: inline-block;
+  padding: 12px 24px;
+  border-radius: 12px;
+  font-weight: 600;
+  font-size: 0.95rem;
+  background-color: #eef2ff;
+  color: #4f46e5;
+  border: 1px solid rgba(79, 70, 229, 0.2);
+  box-shadow: 0 4px 12px rgba(79, 70, 229, 0.1);
+  animation: fadeIn 0.3s ease-in-out;
 }
 </style>
