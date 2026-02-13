@@ -26,12 +26,8 @@
       </div>
 
       <!-- Mensaje -->
-      <div
-        v-if="mostrarMensaje"
-        class="mensaje-container"
-        style="margin-bottom: 20px; display: flex; justify-content: center"
-      >
-        <span class="mensaje" :class="{ 'mensaje-ok': tipoMensaje === 'ok', 'mensaje-error': tipoMensaje === 'error' }">
+      <div v-if="mostrarMensaje" class="mensaje-container" style="margin-bottom: 20px; display: flex; justify-content: center">
+        <span class="mensaje" :class="{ 'mensaje-error': tipoMensaje === 'error' }">
           {{ mensaje }}
         </span>
       </div>
@@ -54,12 +50,7 @@
                 (Sin filtro)
               </div>
 
-              <div
-                v-for="al in aerolineas"
-                :key="'f-' + al"
-                class="dd-item"
-                @click="seleccionarAerolineaFiltro(al)"
-              >
+              <div v-for="al in aerolineas" :key="'f-' + al" class="dd-item" @click="seleccionarAerolineaFiltro(al)">
                 {{ al }}
               </div>
             </div>
@@ -129,12 +120,7 @@
                   </div>
 
                   <div v-if="ddOpen.crear" class="dd-menu" role="listbox">
-                    <div
-                      v-for="al in aerolineas"
-                      :key="'c-' + al"
-                      class="dd-item"
-                      @click="seleccionarAerolineaCrear(al)"
-                    >
+                    <div v-for="al in aerolineas" :key="'c-' + al" class="dd-item" @click="seleccionarAerolineaCrear(al)">
                       {{ al }}
                     </div>
                   </div>
@@ -398,10 +384,8 @@ export default {
     async listar() {
       try {
         this.avionArr = await consultarTodosFachada();
-        this.mostrarAlertaOk("Consulta exitosa");
       } catch (error) {
         this.avionArr = [];
-        this.mostrarAlertaError("No se pudo consultar");
       }
     },
 
@@ -429,8 +413,6 @@ export default {
 
         if (this.avionArr.length === 0) {
           this.mostrarAlertaError("No existe un avión de esta aerolínea");
-        } else {
-          this.mostrarAlertaOk("Consulta exitosa");
         }
       } catch (error) {
         this.avionArr = [];
@@ -454,7 +436,6 @@ export default {
           this.aerolineaEditar = avion.aerolinea;
           this.claseEditar = avion.clase;
           this.espacioEquipajeEditar = avion.espacioEquipaje;
-          this.mostrarAlertaOk("ID encontrado");
         } else {
           this.mostrarAlertaError("El ID no existe");
           this.cancelarEdicion();
@@ -515,7 +496,6 @@ export default {
           this.aerolineaEliminar = avion.aerolinea;
           this.claseEliminar = avion.clase;
           this.espacioEquipajeEliminar = avion.espacioEquipaje;
-          this.mostrarAlertaOk("ID encontrado");
         } else {
           this.mostrarAlertaError("El ID no existe");
           this.cancelarEliminacion();
@@ -617,14 +597,11 @@ export default {
   border-radius: 12px;
   font-weight: 600;
   font-size: 0.95rem;
-  animation: fadeIn 0.3s ease-in-out;
-}
-
-.mensaje-ok {
   background-color: #eef2ff;
   color: #4f46e5;
   border: 1px solid rgba(79, 70, 229, 0.2);
   box-shadow: 0 4px 12px rgba(79, 70, 229, 0.1);
+  animation: fadeIn 0.3s ease-in-out;
 }
 
 .mensaje-error {
