@@ -25,6 +25,15 @@
         </button>
       </div>
 
+      <!-- MENSAJE -->
+      <div
+        v-if="mostrarMensaje"
+        class="mensaje-container"
+        style="margin-bottom: 20px; display: flex; justify-content: center"
+      >
+        <span class="mensaje">{{ mensaje }}</span>
+      </div>
+
       <!-- TAB 1: CREAR -->
       <div v-if="activeTab === 'crear'" class="tab-content">
         <div class="form-card">
@@ -75,11 +84,12 @@
         <div class="seccion-buscar">
           <button @click="listar" class="btn-general">Ver Todos</button>
 
-          <select v-model="aerolineaFiltro" placeholder="Buscar por aerolínea (opcional)" class="input-buscar">
-            <option value="" disabled>Selecciona una aerolínea</option>
+          <select v-model="aerolineaFiltro" class="input-buscar">
+            <option value="">(Opcional) Filtrar por aerolínea</option>
             <option value="Avianca">Avianca</option>
             <option value="LATAM">LATAM</option>
           </select>
+
           <button @click="buscarPorAerolinea" class="btn-buscar">Buscar</button>
         </div>
 
@@ -121,7 +131,12 @@
           <h3 class="form-title">Editar Avión</h3>
 
           <div class="seccion-buscar">
-            <input v-model.number="idBuscar" type="number" placeholder="ID del avión a editar" class="input-buscar" />
+            <input
+              v-model.number="idBuscar"
+              type="number"
+              placeholder="ID del avión a editar"
+              class="input-buscar"
+            />
             <button @click="buscarParaEditar" class="btn-buscar">Buscar</button>
           </div>
 
@@ -176,8 +191,12 @@
           <h3 class="form-title">Eliminar Avión</h3>
 
           <div class="seccion-buscar">
-            <input v-model.number="idEliminar" type="number" placeholder="ID del avión a eliminar"
-              class="input-buscar" />
+            <input
+              v-model.number="idEliminar"
+              type="number"
+              placeholder="ID del avión a eliminar"
+              class="input-buscar"
+            />
             <button @click="buscarParaEliminar" class="btn-buscar">Buscar</button>
           </div>
 
@@ -226,6 +245,10 @@ export default {
       activeTab: "crear",
       avionArr: [],
 
+      // MENSAJES
+      mensaje: "",
+      mostrarMensaje: false,
+
       // CREAR
       modelo: "",
       capacidad: null,
@@ -256,8 +279,18 @@ export default {
   },
 
   methods: {
+    mostrarAlerta(texto) {
+      this.mensaje = texto;
+      this.mostrarMensaje = true;
+
+      setTimeout(() => {
+        this.mostrarMensaje = false;
+      }, 3000);
+    },
+
     async crear() {
       if (!this.modelo || !this.capacidad || !this.aerolinea || !this.clase || !this.espacioEquipaje) {
+        this.mostrarAlerta("No se pudo guardar");
         return;
       }
 
@@ -271,9 +304,15 @@ export default {
         };
 
         await guardarFachada(avion);
+
+        this.mostrarAlerta("Guardado con éxito");
         this.limpiarFormulario();
+
+        await this.listar();
+        this.activeTab = "lista";
       } catch (error) {
-        console.error("Error:", error);
+        console.log("Error:", error);
+        this.mostrarAlerta("No se pudo guardar");
       }
     },
 
@@ -288,51 +327,71 @@ export default {
     async listar() {
       try {
         this.avionArr = await consultarTodosFachada();
+        this.mostrarAlerta("Consulta exitosa");
       } catch (error) {
-        console.error("Error:", error);
+        console.log("Error:", error);
+        this.mostrarAlerta("No se pudo consultar");
       }
     },
 
     async buscarPorAerolinea() {
-      if (!this.aerolineaFiltro) {
-        return await this.listar();
-      }
-
       try {
+        if (!this.aerolineaFiltro) {
+          await this.listar();
+          return;
+        }
 
-        const avion = await buscarPorAerolineaFachada(this.aerolineaFiltro);
+        const res = await buscarPorAerolineaFachada(this.aerolineaFiltro);
+        const lista = Array.isArray(res) ? res : res ? [res] : [];
+        this.avionArr = lista;
 
-        //  convierte a array
-        this.avionArr = avion ? [avion] : [];
-
+        this.mostrarAlerta("Consulta exitosa");
       } catch (error) {
-        console.error("Error:", error);
+        console.log("Error:", error);
+        this.mostrarAlerta("No se pudo consultar");
       }
     },
 
     async buscarParaEditar() {
-      if (!this.idBuscar) return;
+      if (!this.idBuscar) {
+        this.mostrarAlerta("Ingresa primero el ID");
+        return;
+      }
 
       try {
         const avion = await consultarPorIdFachada(this.idBuscar);
 
-        if (avion) {
-          this.idEditar = avion.id;
-          this.modeloEditar = avion.modelo;
-          this.capacidadEditar = avion.capacidad;
-          this.aerolineaEditar = avion.aerolinea;
-          this.claseEditar = avion.clase;
-          this.espacioEquipajeEditar = avion.espacioEquipaje;
-        } else {
-          return null;
+        if (!avion) {
+          this.mostrarAlerta("El ID no existe");
+          this.cancelarEdicion();
+          return;
         }
+
+        this.idEditar = avion.id;
+        this.modeloEditar = avion.modelo || "";
+        this.capacidadEditar = avion.capacidad ?? null;
+        this.aerolineaEditar = avion.aerolinea || "";
+        this.claseEditar = avion.clase || "";
+        this.espacioEquipajeEditar = avion.espacioEquipaje || "";
+
+        this.mostrarAlerta("ID encontrado");
       } catch (error) {
-        console.error("Error:", error);
+        console.log("Error:", error);
+        this.mostrarAlerta("El ID no existe");
+        this.cancelarEdicion();
       }
     },
 
     async actualizar() {
-      if (!this.idEditar || !this.modeloEditar || !this.capacidadEditar || !this.aerolineaEditar || !this.claseEditar || !this.espacioEquipajeEditar) {
+      if (
+        !this.idEditar ||
+        !this.modeloEditar ||
+        !this.capacidadEditar ||
+        !this.aerolineaEditar ||
+        !this.claseEditar ||
+        !this.espacioEquipajeEditar
+      ) {
+        this.mostrarAlerta("No se pudo actualizar");
         return;
       }
 
@@ -347,9 +406,15 @@ export default {
         };
 
         await actualizarFachada(this.idEditar, avion);
+
+        this.mostrarAlerta("Actualizado con éxito");
         this.cancelarEdicion();
+
+        await this.listar();
+        this.activeTab = "lista";
       } catch (error) {
-        console.error("Error:", error);
+        console.log("Error:", error);
+        this.mostrarAlerta("No se pudo actualizar");
       }
     },
 
@@ -364,31 +429,46 @@ export default {
     },
 
     async buscarParaEliminar() {
-      if (!this.idEliminar) return;
+      if (!this.idEliminar) {
+        this.mostrarAlerta("Ingresa primero el ID");
+        return;
+      }
 
       try {
         const avion = await consultarPorIdFachada(this.idEliminar);
 
-        if (avion) {
-          this.modeloEliminar = avion.modelo;
-          this.capacidadEliminar = avion.capacidad;
-          this.aerolineaEliminar = avion.aerolinea;
-          this.claseEliminar = avion.clase;
-          this.espacioEquipajeEliminar = avion.espacioEquipaje;
-        } else {
-          return null;
+        if (!avion) {
+          this.mostrarAlerta("El ID no existe");
+          this.cancelarEliminacion();
+          return;
         }
+
+        this.modeloEliminar = avion.modelo || "";
+        this.capacidadEliminar = avion.capacidad ?? null;
+        this.aerolineaEliminar = avion.aerolinea || "";
+        this.claseEliminar = avion.clase || "";
+        this.espacioEquipajeEliminar = avion.espacioEquipaje || "";
+
+        this.mostrarAlerta("ID encontrado");
       } catch (error) {
-        console.error("Error:", error);
+        console.log("Error:", error);
+        this.mostrarAlerta("El ID no existe");
+        this.cancelarEliminacion();
       }
     },
 
     async confirmarEliminacion() {
       try {
         await borrarFachada(this.idEliminar);
+
+        this.mostrarAlerta("Eliminado con éxito");
         this.cancelarEliminacion();
+
+        await this.listar();
+        this.activeTab = "lista";
       } catch (error) {
-        console.error("Error:", error);
+        console.log("Error:", error);
+        this.mostrarAlerta("No se pudo eliminar");
       }
     },
 
@@ -414,7 +494,7 @@ export default {
   justify-content: center;
   min-height: 100vh;
   background-color: #f3f4f6;
-  font-family: 'Inter', sans-serif;
+  font-family: "Inter", sans-serif;
   padding: 40px 20px;
 }
 
@@ -425,6 +505,35 @@ export default {
   border-radius: 24px;
   box-shadow: 0 20px 60px rgba(0, 0, 0, 0.08);
   padding: 40px;
+}
+
+.mensaje-container {
+  margin-top: 1rem;
+  animation: slideDown 0.3s ease-out;
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.mensaje {
+  display: inline-block;
+  padding: 12px 24px;
+  border-radius: 12px;
+  font-weight: 600;
+  font-size: 0.95rem;
+  background-color: #eef2ff;
+  color: #4f46e5;
+  border: 1px solid rgba(79, 70, 229, 0.2);
+  box-shadow: 0 4px 12px rgba(79, 70, 229, 0.1);
+  animation: fadeIn 0.3s ease-in-out;
 }
 
 .logo-color {
@@ -490,7 +599,6 @@ h2 {
     opacity: 0;
     transform: translateY(10px);
   }
-
   to {
     opacity: 1;
     transform: translateY(0);
@@ -675,7 +783,6 @@ input:disabled {
   background-color: #f3f4f6;
   color: #6b7280;
 }
-
 .form-actions {
   display: flex;
   justify-content: flex-end;
