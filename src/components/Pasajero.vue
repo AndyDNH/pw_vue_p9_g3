@@ -193,7 +193,7 @@
               <button @click="cancelarEdicion" class="btn-limpiar">
                 Cancelar
               </button>
-              <button @click="actualizar" class="btn-general">
+              <button @click="actualizar()" class="btn-general">
                 Actualizar
               </button>
             </div>
@@ -382,7 +382,7 @@ export default {
         !this.nombreEditar ||
         !this.apellidoEditar ||
         !this.cedulaEditar ||
-        !this.emailEditar ||
+        !this.correoEditar ||
         !this.telefonoEditar ||
         !this.fechaNacimientoEditar
       ) {
@@ -395,12 +395,13 @@ export default {
           nombre: this.nombreEditar,
           apellido: this.apellidoEditar,
           cedula: this.cedulaEditar,
-          email: this.emailEditar,
+          correo: this.correoEditar,
           telefono: this.telefonoEditar,
-          fechaNacimiento: this.fechaNacimientoEditar,
+          fechaNacimiento: this.fechaNacimientoEditar + "T00:00:00",
         };
 
         await actualizarFachada(this.idEditar, pasajero);
+        this.mostrarAlerta("Pasajero actualizado exitosamente");
         this.cancelarEdicion();
       } catch (error) {
         console.log("Error:", error);

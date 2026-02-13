@@ -582,7 +582,7 @@ export default {
       origen: this.origenEliminar,
       destino: this.destinoEliminar,
       precio: this.precioEliminar,
-      estado: "CANCELADO",
+      estado: "Cancelado",
       asiento: this.asientoEliminar,
       idAvion: this.idAvionEliminar,
       idPasajero: this.idPasajeroEliminar,
