@@ -9,13 +9,13 @@
         </div>
       </div>
 
-      <!-- Tabs -->
+      <!-- Tabs (Reporte primero) -->
       <div class="tabs">
-        <button :class="['tab', { active: activeTab === 'crear' }]" @click="activeTab = 'crear'">
-          Crear Avión
-        </button>
         <button :class="['tab', { active: activeTab === 'lista' }]" @click="activeTab = 'lista'">
           Reporte de Aviones
+        </button>
+        <button :class="['tab', { active: activeTab === 'crear' }]" @click="activeTab = 'crear'">
+          Crear Avión
         </button>
         <button :class="['tab', { active: activeTab === 'editar' }]" @click="activeTab = 'editar'">
           Editar Avión
@@ -26,69 +26,38 @@
       </div>
 
       <!-- MENSAJE -->
-      <div
-        v-if="mostrarMensaje"
-        class="mensaje-container"
-        style="margin-bottom: 20px; display: flex; justify-content: center"
-      >
-        <span class="mensaje">{{ mensaje }}</span>
+      <div v-if="mostrarMensaje" class="mensaje-container"
+        style="margin-bottom: 20px; display: flex; justify-content: center">
+        <span class="mensaje" :class="{ 'mensaje-ok': tipoMensaje === 'ok', 'mensaje-error': tipoMensaje === 'error' }">
+          {{ mensaje }}
+        </span>
       </div>
 
-      <!-- TAB 1: CREAR -->
-      <div v-if="activeTab === 'crear'" class="tab-content">
-        <div class="form-card">
-          <h3 class="form-title">Crear Nuevo Avión</h3>
-
-          <div class="pasajero-form">
-            <div class="form-grid">
-              <div class="form-group">
-                <label>Modelo:</label>
-                <input v-model="modelo" type="text" placeholder="Boeing 737" />
-              </div>
-
-              <div class="form-group">
-                <label>Capacidad:</label>
-                <input v-model.number="capacidad" type="number" min="1" placeholder="180" />
-              </div>
-
-              <div class="form-group">
-                <label>Aerolínea:</label>
-                <select v-model="aerolinea">
-                  <option value="" disabled>Selecciona una aerolínea</option>
-                  <option value="Avianca">Avianca</option>
-                  <option value="LATAM">LATAM</option>
-                </select>
-              </div>
-
-              <div class="form-group">
-                <label>Clase:</label>
-                <input v-model="clase" type="text" placeholder="Económica" />
-              </div>
-
-              <div class="form-group full-width">
-                <label>Espacio Equipaje:</label>
-                <input v-model="espacioEquipaje" type="text" placeholder="20kg" />
-              </div>
-            </div>
-
-            <div class="form-actions">
-              <button @click="limpiarFormulario" class="btn-limpiar">Limpiar</button>
-              <button @click="crear" class="btn-general">Guardar</button>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- TAB 2: LISTA -->
+      <!-- TAB: LISTA -->
       <div v-if="activeTab === 'lista'" class="tab-content">
         <div class="seccion-buscar">
           <button @click="listar" class="btn-general">Ver Todos</button>
 
-          <select v-model="aerolineaFiltro" class="input-buscar">
-            <option value="">(Opcional) Filtrar por aerolínea</option>
-            <option value="Avianca">Avianca</option>
-            <option value="LATAM">LATAM</option>
-          </select>
+          <!-- DROPDOWN custom filtro -->
+          <div class="dd" ref="ddFiltro" @keydown.esc.prevent="cerrarDropdown('filtro')" tabindex="0">
+            <div class="dd-control input-buscar" @click="toggleDropdown('filtro')" role="button"
+              aria-haspopup="listbox">
+              <span class="dd-value" :class="{ 'dd-placeholder': !aerolineaFiltro }">
+                {{ aerolineaFiltro || "(Opcional) Filtrar por aerolínea" }}
+              </span>
+              <span class="dd-arrow" :class="{ open: ddOpen.filtro }">▾</span>
+            </div>
+
+            <div v-if="ddOpen.filtro" class="dd-menu" role="listbox">
+              <div class="dd-item dd-item--muted" @click="seleccionarAerolineaFiltro('')">
+                (Sin filtro)
+              </div>
+
+              <div v-for="al in aerolineas" :key="'f-' + al" class="dd-item" @click="seleccionarAerolineaFiltro(al)">
+                {{ al }}
+              </div>
+            </div>
+          </div>
 
           <button @click="buscarPorAerolinea" class="btn-buscar">Buscar</button>
         </div>
@@ -125,18 +94,70 @@
         </div>
       </div>
 
-      <!-- TAB 3: EDITAR -->
+      <!-- TAB: CREAR -->
+      <div v-if="activeTab === 'crear'" class="tab-content">
+        <div class="form-card">
+          <h3 class="form-title">Crear Nuevo Avión</h3>
+
+          <div class="pasajero-form">
+            <div class="form-grid">
+              <div class="form-group">
+                <label>Modelo:</label>
+                <input v-model="modelo" type="text" placeholder="Boeing 737" />
+              </div>
+
+              <div class="form-group">
+                <label>Capacidad:</label>
+                <input v-model.number="capacidad" type="number" min="1" placeholder="180" />
+              </div>
+
+              <!-- DROPDOWN custom crear -->
+              <div class="form-group">
+                <label>Aerolínea:</label>
+
+                <div class="dd" ref="ddCrear" @keydown.esc.prevent="cerrarDropdown('crear')" tabindex="0">
+                  <div class="dd-control" @click="toggleDropdown('crear')" role="button" aria-haspopup="listbox">
+                    <span class="dd-value" :class="{ 'dd-placeholder': !aerolinea }">
+                      {{ aerolinea || "Selecciona una aerolínea" }}
+                    </span>
+                    <span class="dd-arrow" :class="{ open: ddOpen.crear }">▾</span>
+                  </div>
+
+                  <div v-if="ddOpen.crear" class="dd-menu" role="listbox">
+                    <div v-for="al in aerolineas" :key="'c-' + al" class="dd-item"
+                      @click="seleccionarAerolineaCrear(al)">
+                      {{ al }}
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="form-group">
+                <label>Clase:</label>
+                <input v-model="clase" type="text" placeholder="Económica" />
+              </div>
+
+              <div class="form-group full-width">
+                <label>Espacio Equipaje:</label>
+                <input v-model="espacioEquipaje" type="text" placeholder="20kg" />
+              </div>
+            </div>
+
+            <div class="form-actions">
+              <button @click="limpiarFormulario" class="btn-limpiar">Limpiar</button>
+              <button @click="crear" class="btn-general">Guardar</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- TAB: EDITAR -->
       <div v-if="activeTab === 'editar'" class="tab-content">
         <div class="form-card">
           <h3 class="form-title">Editar Avión</h3>
 
           <div class="seccion-buscar">
-            <input
-              v-model.number="idBuscar"
-              type="number"
-              placeholder="ID del avión a editar"
-              class="input-buscar"
-            />
+            <input v-model.number="idBuscar" type="number" placeholder="ID del avión a editar" class="input-buscar" />
             <button @click="buscarParaEditar" class="btn-buscar">Buscar</button>
           </div>
 
@@ -185,18 +206,14 @@
         </div>
       </div>
 
-      <!-- TAB 4: ELIMINAR -->
+      <!-- TAB: ELIMINAR -->
       <div v-if="activeTab === 'eliminar'" class="tab-content">
         <div class="form-card">
           <h3 class="form-title">Eliminar Avión</h3>
 
           <div class="seccion-buscar">
-            <input
-              v-model.number="idEliminar"
-              type="number"
-              placeholder="ID del avión a eliminar"
-              class="input-buscar"
-            />
+            <input v-model.number="idEliminar" type="number" placeholder="ID del avión a eliminar"
+              class="input-buscar" />
             <button @click="buscarParaEliminar" class="btn-buscar">Buscar</button>
           </div>
 
@@ -242,12 +259,36 @@ import {
 export default {
   data() {
     return {
-      activeTab: "crear",
+      activeTab: "lista",
       avionArr: [],
 
       // MENSAJES
       mensaje: "",
       mostrarMensaje: false,
+      tipoMensaje: "ok", 
+
+      ddOpen: {
+        crear: false,
+        filtro: false,
+      },
+
+      aerolineas: [
+        "Avianca",
+        "LATAM",
+        "American Airlines",
+        "Delta Air Lines",
+        "United Airlines",
+        "Air Canada",
+        "Copa Airlines",
+        "Aeroméxico",
+        "Iberia",
+        "Air France",
+        "KLM",
+        "Lufthansa",
+        "Turkish Airlines",
+        "Emirates",
+        "Qatar Airways",
+      ],
 
       // CREAR
       modelo: "",
@@ -279,18 +320,48 @@ export default {
   },
 
   methods: {
-    mostrarAlerta(texto) {
-      this.mensaje = texto;
-      this.mostrarMensaje = true;
 
-      setTimeout(() => {
-        this.mostrarMensaje = false;
-      }, 3000);
+    mostrarAlertaOk(texto) {
+      this.mensaje = texto;
+      this.tipoMensaje = "ok";
+      this.mostrarMensaje = true;
+      setTimeout(() => (this.mostrarMensaje = false), 3000);
+    },
+    mostrarAlertaError(texto) {
+      this.mensaje = texto;
+      this.tipoMensaje = "error";
+      this.mostrarMensaje = true;
+      setTimeout(() => (this.mostrarMensaje = false), 3000);
     },
 
+    toggleDropdown(tipo) {
+
+      Object.keys(this.ddOpen).forEach((k) => {
+        if (k !== tipo) this.ddOpen[k] = false;
+      });
+      this.ddOpen[tipo] = !this.ddOpen[tipo];
+    },
+    cerrarDropdown(tipo) {
+      this.ddOpen[tipo] = false;
+    },
+    cerrarTodosDropdowns() {
+      this.ddOpen.crear = false;
+      this.ddOpen.filtro = false;
+    },
+
+    seleccionarAerolineaCrear(valor) {
+      this.aerolinea = valor;
+      this.cerrarDropdown("crear");
+    },
+    seleccionarAerolineaFiltro(valor) {
+      this.aerolineaFiltro = valor;
+      this.cerrarDropdown("filtro");
+    },
+
+    // ========= CRUD =========
     async crear() {
       if (!this.modelo || !this.capacidad || !this.aerolinea || !this.clase || !this.espacioEquipaje) {
-        this.mostrarAlerta("No se pudo guardar");
+        this.mostrarAlertaError("No se pudo guardar");
         return;
       }
 
@@ -304,15 +375,11 @@ export default {
         };
 
         await guardarFachada(avion);
-
-        this.mostrarAlerta("Guardado con éxito");
+        this.mostrarAlertaOk("Guardado con éxito");
         this.limpiarFormulario();
-
-        await this.listar();
-        this.activeTab = "lista";
+        await this.listarSilencioso();
       } catch (error) {
-        console.log("Error:", error);
-        this.mostrarAlerta("No se pudo guardar");
+        this.mostrarAlertaError("No se pudo guardar");
       }
     },
 
@@ -327,71 +394,73 @@ export default {
     async listar() {
       try {
         this.avionArr = await consultarTodosFachada();
-        this.mostrarAlerta("Consulta exitosa");
+        this.mostrarAlertaOk("Consulta exitosa");
       } catch (error) {
-        console.log("Error:", error);
-        this.mostrarAlerta("No se pudo consultar");
+        this.mostrarAlertaError("No se pudo consultar");
       }
     },
 
-    async buscarPorAerolinea() {
+    async listarSilencioso() {
       try {
-        if (!this.aerolineaFiltro) {
-          await this.listar();
-          return;
-        }
+        this.avionArr = await consultarTodosFachada();
+      } catch (_) { }
+    },
 
+    async buscarPorAerolinea() {
+      if (!this.aerolineaFiltro) {
+        await this.listar();
+        return;
+      }
+
+      try {
         const res = await buscarPorAerolineaFachada(this.aerolineaFiltro);
-        const lista = Array.isArray(res) ? res : res ? [res] : [];
-        this.avionArr = lista;
 
-        this.mostrarAlerta("Consulta exitosa");
+        if (Array.isArray(res)) this.avionArr = res;
+        else if (res) this.avionArr = [res];
+        else this.avionArr = [];
+
+        if (this.avionArr.length === 0) {
+          this.mostrarAlertaError("No existe un avión de esta aerolínea");
+        } else {
+          this.mostrarAlertaOk("Consulta exitosa");
+        }
       } catch (error) {
-        console.log("Error:", error);
-        this.mostrarAlerta("No se pudo consultar");
+        this.avionArr = [];
+        this.mostrarAlertaError("No existe un avión de esta aerolínea");
       }
     },
 
     async buscarParaEditar() {
       if (!this.idBuscar) {
-        this.mostrarAlerta("Ingresa primero el ID");
+        this.mostrarAlertaError("Ingresa primero el ID");
         return;
       }
 
       try {
         const avion = await consultarPorIdFachada(this.idBuscar);
 
-        if (!avion) {
-          this.mostrarAlerta("El ID no existe");
+        if (avion) {
+          this.idEditar = avion.id;
+          this.modeloEditar = avion.modelo;
+          this.capacidadEditar = avion.capacidad;
+          this.aerolineaEditar = avion.aerolinea;
+          this.claseEditar = avion.clase;
+          this.espacioEquipajeEditar = avion.espacioEquipaje;
+
+          this.mostrarAlertaOk("ID encontrado");
+        } else {
+          this.mostrarAlertaError("El ID no existe");
           this.cancelarEdicion();
-          return;
         }
-
-        this.idEditar = avion.id;
-        this.modeloEditar = avion.modelo || "";
-        this.capacidadEditar = avion.capacidad ?? null;
-        this.aerolineaEditar = avion.aerolinea || "";
-        this.claseEditar = avion.clase || "";
-        this.espacioEquipajeEditar = avion.espacioEquipaje || "";
-
-        this.mostrarAlerta("ID encontrado");
       } catch (error) {
-        console.log("Error:", error);
-        this.mostrarAlerta("El ID no existe");
+        this.mostrarAlertaError("El ID no existe");
         this.cancelarEdicion();
       }
     },
 
     async actualizar() {
-      if (
-        !this.idEditar ||
-        !this.modeloEditar ||
-        !this.capacidadEditar ||
-        !this.aerolineaEditar ||
-        !this.claseEditar ||
-        !this.espacioEquipajeEditar
-      ) {
-        this.mostrarAlerta("No se pudo actualizar");
+      if (!this.idEditar) {
+        this.mostrarAlertaError("No se pudo actualizar");
         return;
       }
 
@@ -406,15 +475,11 @@ export default {
         };
 
         await actualizarFachada(this.idEditar, avion);
-
-        this.mostrarAlerta("Actualizado con éxito");
+        this.mostrarAlertaOk("Actualizado con éxito");
         this.cancelarEdicion();
-
-        await this.listar();
-        this.activeTab = "lista";
+        await this.listarSilencioso();
       } catch (error) {
-        console.log("Error:", error);
-        this.mostrarAlerta("No se pudo actualizar");
+        this.mostrarAlertaError("No se pudo actualizar");
       }
     },
 
@@ -430,45 +495,44 @@ export default {
 
     async buscarParaEliminar() {
       if (!this.idEliminar) {
-        this.mostrarAlerta("Ingresa primero el ID");
+        this.mostrarAlertaError("Ingresa primero el ID");
         return;
       }
 
       try {
         const avion = await consultarPorIdFachada(this.idEliminar);
 
-        if (!avion) {
-          this.mostrarAlerta("El ID no existe");
+        if (avion) {
+          this.modeloEliminar = avion.modelo;
+          this.capacidadEliminar = avion.capacidad;
+          this.aerolineaEliminar = avion.aerolinea;
+          this.claseEliminar = avion.clase;
+          this.espacioEquipajeEliminar = avion.espacioEquipaje;
+
+          this.mostrarAlertaOk("ID encontrado");
+        } else {
+          this.mostrarAlertaError("El ID no existe");
           this.cancelarEliminacion();
-          return;
         }
-
-        this.modeloEliminar = avion.modelo || "";
-        this.capacidadEliminar = avion.capacidad ?? null;
-        this.aerolineaEliminar = avion.aerolinea || "";
-        this.claseEliminar = avion.clase || "";
-        this.espacioEquipajeEliminar = avion.espacioEquipaje || "";
-
-        this.mostrarAlerta("ID encontrado");
       } catch (error) {
-        console.log("Error:", error);
-        this.mostrarAlerta("El ID no existe");
+        this.mostrarAlertaError("El ID no existe");
         this.cancelarEliminacion();
       }
     },
 
     async confirmarEliminacion() {
+      if (!this.idEliminar) {
+        this.mostrarAlertaError("No se pudo eliminar");
+        return;
+      }
+
       try {
         await borrarFachada(this.idEliminar);
-
-        this.mostrarAlerta("Eliminado con éxito");
+        this.mostrarAlertaOk("Eliminado con éxito");
         this.cancelarEliminacion();
-
-        await this.listar();
-        this.activeTab = "lista";
+        await this.listarSilencioso();
       } catch (error) {
-        console.log("Error:", error);
-        this.mostrarAlerta("No se pudo eliminar");
+        this.mostrarAlertaError("No se pudo eliminar");
       }
     },
 
@@ -483,7 +547,25 @@ export default {
   },
 
   mounted() {
-    this.listar();
+    this.listarSilencioso();
+
+    this.__onDocClick = (e) => {
+      const crear = this.$refs.ddCrear;
+      const filtro = this.$refs.ddFiltro;
+
+      const clickDentroCrear = crear && crear.contains(e.target);
+      const clickDentroFiltro = filtro && filtro.contains(e.target);
+
+      if (!clickDentroCrear && !clickDentroFiltro) {
+        this.cerrarTodosDropdowns();
+      }
+    };
+
+    document.addEventListener("click", this.__onDocClick);
+  },
+
+  beforeUnmount() {
+    document.removeEventListener("click", this.__onDocClick);
   },
 };
 </script>
@@ -517,6 +599,7 @@ export default {
     opacity: 0;
     transform: translateY(-10px);
   }
+
   to {
     opacity: 1;
     transform: translateY(0);
@@ -529,11 +612,21 @@ export default {
   border-radius: 12px;
   font-weight: 600;
   font-size: 0.95rem;
-  background-color: #eef2ff;
-  color: #4f46e5;
-  border: 1px solid rgba(79, 70, 229, 0.2);
-  box-shadow: 0 4px 12px rgba(79, 70, 229, 0.1);
   animation: fadeIn 0.3s ease-in-out;
+}
+
+.mensaje-ok {
+  background-color: #ecfdf5;
+  color: #065f46;
+  border: 1px solid #a7f3d0;
+  box-shadow: 0 4px 12px rgba(6, 95, 70, 0.12);
+}
+
+.mensaje-error {
+  background-color: #fef2f2;
+  color: #991b1b;
+  border: 1px solid #fecaca;
+  box-shadow: 0 4px 12px rgba(153, 27, 27, 0.12);
 }
 
 .logo-color {
@@ -599,6 +692,7 @@ h2 {
     opacity: 0;
     transform: translateY(10px);
   }
+
   to {
     opacity: 1;
     transform: translateY(0);
@@ -610,21 +704,12 @@ h2 {
   gap: 1rem;
   margin-bottom: 2rem;
   flex-wrap: wrap;
+  align-items: center;
 }
 
 .input-buscar {
   flex: 1;
   min-width: 250px;
-  padding: 0.75rem 1rem;
-  border: 1px solid #d1d5db;
-  border-radius: 8px;
-  font-size: 1rem;
-}
-
-.input-buscar:focus {
-  outline: none;
-  border-color: #4f46e5;
-  box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
 }
 
 .btn-general,
@@ -751,20 +836,6 @@ label {
   font-size: 0.95rem;
 }
 
-select {
-  padding: 0.75rem;
-  border: 1px solid #d1d5db;
-  border-radius: 8px;
-  font-size: 1rem;
-  background-color: white;
-}
-
-select:focus {
-  outline: none;
-  border-color: #4f46e5;
-  box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
-}
-
 input {
   padding: 0.75rem;
   border: 1px solid #d1d5db;
@@ -783,6 +854,7 @@ input:disabled {
   background-color: #f3f4f6;
   color: #6b7280;
 }
+
 .form-actions {
   display: flex;
   justify-content: flex-end;
@@ -820,5 +892,88 @@ input:disabled {
 
 .info-grid strong {
   color: #111827;
+}
+
+/* ===== Dropdown custom (SIEMPRE hacia abajo) ===== */
+.dd {
+  position: relative;
+  width: 100%;
+  max-width: 520px;
+  min-width: 250px;
+}
+
+.dd-control {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 0.75rem 1rem;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  font-size: 1rem;
+  background: #fff;
+  cursor: pointer;
+  user-select: none;
+}
+
+.dd-control:focus,
+.dd:focus .dd-control {
+  outline: none;
+  border-color: #4f46e5;
+  box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
+}
+
+.dd-value {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  color: #111827;
+}
+
+.dd-placeholder {
+  color: #6b7280;
+}
+
+.dd-arrow {
+  transition: transform 0.15s ease;
+  color: #6b7280;
+}
+
+.dd-arrow.open {
+  transform: rotate(180deg);
+}
+
+.dd-menu {
+  position: absolute;
+  top: calc(100% + 8px);
+  /* siempre abajo */
+  left: 0;
+  right: 0;
+  z-index: 50;
+  background: #fff;
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  box-shadow: 0 18px 40px rgba(0, 0, 0, 0.14);
+  padding: 8px;
+  max-height: 240px;
+  /* scroleable */
+  overflow-y: auto;
+}
+
+.dd-item {
+  padding: 10px 10px;
+  border-radius: 10px;
+  cursor: pointer;
+  font-weight: 500;
+  color: #111827;
+}
+
+.dd-item:hover {
+  background: #eef2ff;
+}
+
+.dd-item--muted {
+  color: #374151;
+  font-weight: 600;
 }
 </style>
